@@ -52,8 +52,6 @@ void Client::start_send() {
         out_pckt.type = PCKTYPE::TEXT;
         out_pckt = msg;
 
-        std::cout << "MSG: " << msg << std::endl;
-
         if(send_pckt(m_sock_fd, out_pckt) < 0) {
             std::cout << "Packet send failed: [ERROR] ";
             std::cout << strerror(errno) << std::endl;
