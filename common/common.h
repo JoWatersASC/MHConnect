@@ -45,7 +45,7 @@ inline packet createPacket(const std::string& message) {
 }
 
 inline ssize_t send_pckt(const int socket_fd, const packet& p) {
-  return send(socket_fd, &p, sizeof(packet), 0);
+    return send(socket_fd, &p, sizeof(packet), 0);
 }
 inline ssize_t recv_pckt(const int socket_fd, packet& p) {
   return recv(socket_fd, &p, sizeof(p), 0);
