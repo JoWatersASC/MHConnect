@@ -3,8 +3,6 @@
 namespace osf
 {
 
-constexpr uint16_t PORT = 8080;
-
 void Server::accept_client() {
     sockaddr_in c_addr;
     socklen_t c_addr_len = sizeof(sockaddr_in);

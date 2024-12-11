@@ -5,6 +5,8 @@
 namespace osf
 {
     
+static uint16_t PORT = 4000;
+
 class Server {
 public:
     Server(size_t _num_threads = 5) : recv_tp(_num_threads * 2 / 3), send_tp(_num_threads - (_num_threads * 2 / 3)),
