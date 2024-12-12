@@ -48,18 +48,21 @@ void Client::start_send() {
     }
 
     std::string msg;
+    std::cout << "[YOU] ";
+
     while(std::getline(std::cin, msg) && connected) {
         packet out_pckt{};
         out_pckt.type = PCKTYPE::TEXT;
         out_pckt = msg;
 
         ssize_t bytes = send_pckt(m_sock_fd, out_pckt);
-        std::cout << bytes << std::endl;
 
         if(bytes < 0) {
             std::cout << "Packet send failed: [ERROR] ";
             std::cout << strerror(errno) << std::endl;
         }
+        
+        std::cout << "[YOU] ";
     }
 
     close();

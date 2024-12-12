@@ -54,6 +54,9 @@ private:
     ThreadPool& send_tp;
     ChatRoom& room;
 
+    std::mutex send_mtx;
+    std::mutex recv_mtx;
+
     const id_t id;
     const int m_fd;
     const sockaddr_in m_addr;
