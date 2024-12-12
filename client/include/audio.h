@@ -18,7 +18,7 @@ namespace osf
 
 static constexpr int SAMPLE_RATE = 44100;
 static constexpr unsigned int BUFFER_FRAMES = 256;
-static constexpr int CHANNELS = 2;
+static constexpr int CHANNELS = 1;
 static constexpr int BYTES_PER_SAMPLE = sizeof(float);
 
 class AudioStreamer {
