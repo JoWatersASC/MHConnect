@@ -20,7 +20,7 @@ void Connection::recv_text() {
     if(bytes <= 0)
         ::close(m_fd);
     else {
-        send_tp.add([&]() { room.broadcast(p, id); });
+        send_tp.add([&]() { broadcast(p); });
         recv_tp.add([&]() { recv_text(); });
     }
 }

@@ -75,9 +75,10 @@ inline std::ostream& operator<<(std::ostream& out, const packet& p) {
             _type = "Invalid";
             break;
     }
+    
     if(DEBUG)
         out << "Type: " << _type << ", ID: " << p.id << ", Data: ";
-        
+
     out << p.data;
     return out;
 }
