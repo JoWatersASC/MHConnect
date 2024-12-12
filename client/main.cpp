@@ -4,7 +4,13 @@ using namespace osf;
 
 int main(int argc, char* argv[]) {
     int cl_fd = socket(AF_INET, SOCK_STREAM, 0);
-    sockaddr_in serv_addr = create_address(argv[1], std::stoi(argv[2]));
+    sockaddr_in serv_addr;
+
+    if(argc == 3)
+        serv_addr = create_address(argv[1], std::stoi(argv[2]));
+    else 
+        serv_addr = create_address("10.15.51.101", 4000);
+
 
     Client firstc(cl_fd, serv_addr);
     firstc.start_connect();
