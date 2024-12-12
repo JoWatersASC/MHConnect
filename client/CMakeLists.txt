@@ -9,8 +9,8 @@ set(HEADER_FILES "${INCLUDE_DIR}/client.h" "${INCLUDE_DIR}/audio.h")
 # find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
 
 if(Win32)
-    set(RTAUDIO_PATH "path/to/rtaudio")
-    set(RTAUDIO_INSTALLATION_PATH "path/to/rtaudio/clone")
+    set(RTAUDIO_PATH "C:/sdk/lib/rtaudio/RELEASE")
+    set(RTAUDIO_INSTALLATION_PATH "C:/sdk/repos/rtaudio")
 endif()
 
 if(UNIX)
