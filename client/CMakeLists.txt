@@ -2,8 +2,8 @@
 
 set(INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
-set(SOURCE_FILES src/client.cpp)
-set(HEADER_FILES "${INCLUDE_DIR}/client.h")
+set(SOURCE_FILES src/client.cpp src/audio.cpp)
+set(HEADER_FILES "${INCLUDE_DIR}/client.h" "${INCLUDE_DIR}/audio.h")
 
 # find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
 
@@ -11,7 +11,7 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(RTAUDIO REQUIRED rtaudio)
 
 set(EX_NAME "MHConnect")
-add_executable(${EX_NAME} main.cpp ${SOURCE_FILES})
+add_executable(${EX_NAME} main.cpp ${SOURCE_FILES} ${HEADER_FILES})
 # set_target_properties(PROPERTIES OUTPUT_DIR "${CMAKE_BINARY_DIR}/bin")
 
 target_include_directories(${EX_NAME} PRIVATE ${INCLUDE_DIR} "${CMAKE_SOURCE_DIR}/common")

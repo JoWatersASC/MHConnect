@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../common/common.h"
+#include "audio.h"
 
 #include<memory>
 #include<algorithm>
@@ -13,17 +14,22 @@ class Client {
 public:
     Client();
     Client(int _fd, sockaddr_in& _addr) 
-    : m_sock_fd(std::move(_fd)), m_addr(std::move(_addr)), connected(false) {}
+    : m_sock_fd(std::move(_fd)), m_addr(std::move(_addr)),
+    connected(false), m_audio(m_sock_fd) {}
 
     void start_connect();
     void start_recv();
     void start_send();
 
+    void start_audio_in();
+    void start_audio_out();
+    
     void close();
 
 private:
     int m_sock_fd;
     sockaddr_in m_addr;
+    AudioStreamer m_audio;
 
     packet m_pckt;
 
