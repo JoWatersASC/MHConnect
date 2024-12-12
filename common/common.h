@@ -37,7 +37,7 @@ struct packet {
 
     packet& operator=(const std::string& _data) {
         memset(data, 0, sizeof(data));
-        memcpy(data, _data.data(), sizeof(data));
+        memcpy(data, _data.data(), sizeof(data) - 1);
 
         return *this;
     }
@@ -54,7 +54,7 @@ inline ssize_t send_pckt(const int socket_fd, const packet& p) {
     return bytes;
 }
 inline ssize_t recv_pckt(const int socket_fd, packet& p) {
-  return recv(socket_fd, &p, sizeof(p), 0);
+  return recv(socket_fd, &p, sizeof(packet), 0);
 }
 
 inline std::ostream& operator<<(std::ostream& out, const packet& p) {
