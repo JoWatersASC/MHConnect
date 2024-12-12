@@ -18,8 +18,13 @@ void Connection::recv_text() {
     ssize_t bytes = recv_pckt(m_fd, p);
     p.id = id;
 
-    if(bytes <= 0)
-        ::close(m_fd);
+    if (bytes <= 0) {
+#ifdef WIN32
+        closesocket(m_fd);
+#else
+        close(m_fd);
+#endif
+    } 
     else {
         send_tp.add([p, this]() { broadcast(p); });
         recv_tp.add([this]() { recv_text(); });

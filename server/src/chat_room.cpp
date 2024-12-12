@@ -24,7 +24,7 @@ void ChatRoom::broadcast(const packet p, const id_t& source_id) {
 //     broadcast(p, 0);
 // }
 
-void ChatRoom::add_client(int _fd, sockaddr_in _addr) {
+void ChatRoom::add_client(socket_t _fd, sockaddr_in _addr) {
     std::unique_lock<std::mutex> lock(m_mtx);
 
     id_t new_client_id;
@@ -34,7 +34,7 @@ void ChatRoom::add_client(int _fd, sockaddr_in _addr) {
     } while(client_ids.count(new_client_id));
     
     m_clients.emplace_back(recv_tp, send_tp, *this, 
-        std::move(_fd), std::move(_addr), new_client_id);
+        std::move(_fd), _addr, new_client_id);
 
     std::cout << "New client connected: ip-" << inet_ntoa(_addr.sin_addr) << std::endl;
 
