@@ -23,10 +23,11 @@ void Client::start_recv() {
         return;
     }
 
-    ssize_t bytes = recv_pckt(m_sock_fd, m_pckt);
+    packet out_pckt;
+    ssize_t bytes = recv_pckt(m_sock_fd, out_pckt);
 
     if(bytes > 0 && connected) {
-        std::cout << "Received: " << m_pckt << std::endl;
+        std::cout << "Received: " << out_pckt << std::endl;
         std::thread([this]() { start_recv(); }).detach();
     } else {
         if(bytes == 0) {
