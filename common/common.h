@@ -17,6 +17,7 @@
 #include<signal.h>
 #include<arpa/inet.h>
 
+#define DEBUG 0
 
 using Byte = unsigned char;
 constexpr uint16_t PACK_LEN = 4096;
@@ -74,7 +75,10 @@ inline std::ostream& operator<<(std::ostream& out, const packet& p) {
             _type = "Invalid";
             break;
     }
-    out << "Type: " << _type << ", ID: " << p.id << ", Data: " << p.data;
+    if(DEBUG)
+        out << "Type: " << _type << ", ID: " << p.id << ", Data: ";
+        
+    out << p.data;
     return out;
 }
 
