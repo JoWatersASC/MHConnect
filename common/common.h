@@ -20,7 +20,7 @@
 #define DEBUG 0
 
 using Byte = unsigned char;
-constexpr uint16_t PACK_LEN = 4096;
+constexpr uint16_t PACK_LEN = 2048;
 
 enum class PCKTYPE : short { DEFAULT, TEXT, AUDIO, VIDEO };
 
@@ -28,6 +28,10 @@ struct packet {
     PCKTYPE type = PCKTYPE::TEXT;
     uint32_t id = 0;
     char data[PACK_LEN];
+
+    packet() {
+        memset(data, 0, PACK_LEN);
+    }
 
     packet& operator=(const packet&) = default;
 
@@ -46,7 +50,8 @@ inline packet createPacket(const std::string& message) {
 }
 
 inline ssize_t send_pckt(const int socket_fd, const packet& p) {
-    return send(socket_fd, &p, sizeof(packet), 0);
+    ssize_t bytes = send(socket_fd, &p, sizeof(packet), 0);
+    return bytes;
 }
 inline ssize_t recv_pckt(const int socket_fd, packet& p) {
   return recv(socket_fd, &p, sizeof(p), 0);

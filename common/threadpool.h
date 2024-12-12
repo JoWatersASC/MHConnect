@@ -136,7 +136,7 @@ public:
         m_que.pop();
         return out;
     }
-    bool empty() const {
+    bool empty() {
         std::unique_lock<std::mutex> lock(m_mtx);
         return m_que.empty();
     }
