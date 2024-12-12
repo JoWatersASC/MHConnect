@@ -47,7 +47,8 @@ inline void ThreadPool::add(T&& _func) {
     m_cv.notify_one();
 }
 
-inline ThreadPool::ThreadPool(size_t num_threads) : close(false) {
+inline ThreadPool::ThreadPool(size_t num_threads) {
+    close = false;
     if(num_threads == 0)
         num_threads = 1;
 	//Log.open("log.txt");

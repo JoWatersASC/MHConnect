@@ -10,17 +10,37 @@
 #include<mutex>
 #include<fstream>
 #include<algorithm>
-
 #include<cstring>
+#include<cctype>
+#include<cstdint>
+
+
+#ifdef _WIN32
+
+#include "MHwindows.h"
+
+constexpr int winsock_initialize(){
+    if (result != 0) {
+        std::cerr << "WSAStartup failed with error: " << result << std::endl;
+        return 1;  // Exit the program or handle the error appropriately
+    }
+    std::cout << "Winsock initialized successfully!" << std::endl;
+    return 0;
+}
+
+#elif defined(__linux__)
 #include<netinet/in.h>
 #include<unistd.h>
 #include<signal.h>
 #include<arpa/inet.h>
 
+#define socket_t int
+#endif
+
 #define DEBUG 0
 
 using Byte = unsigned char;
-constexpr uint16_t PACK_LEN = 2048;
+constexpr uint16_t PACK_LEN = 2048;  
 
 enum class PCKTYPE : short { DEFAULT, TEXT, AUDIO, VIDEO };
 
@@ -92,4 +112,8 @@ inline bool operator==(const sockaddr_in& a, const sockaddr_in& b) {
     return a.sin_addr.s_addr == b.sin_addr.s_addr 
         && a.sin_family == b.sin_family
         && a.sin_port == b.sin_port;
+}
+
+namespace osf {
+    static uint16_t PORT = 8000;
 }
