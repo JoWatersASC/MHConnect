@@ -26,7 +26,7 @@ public:
       connected(other.connected.load()) {}
 
     void broadcast(const packet& p);
-    void send_text(const packet& p);
+    void send_text(const packet p);
     void recv_text();
 
     std::string getIp() {

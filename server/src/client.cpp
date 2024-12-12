@@ -3,7 +3,7 @@
 
 using namespace osf;
 
-void Connection::send_text(const packet& p) {
+void Connection::send_text(const packet p) {
     send_tp.add([this, &p]() { send_pckt(m_fd, p); });
 }
 

@@ -20,7 +20,7 @@ public:
         m_clients.reserve(num_clients);
     }
 
-    void broadcast(const packet&, const id_t&);
+    void broadcast(const packet, const id_t&);
     void broadcast(std::string);
     void add_client(int, sockaddr_in);
 
@@ -31,6 +31,8 @@ private:
     ThreadPool& recv_tp;
     ThreadPool& send_tp;
     std::mutex m_mtx;
+    
+    tqueue<packet> msg_queue;
 
 };
 

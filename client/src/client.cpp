@@ -53,7 +53,10 @@ void Client::start_send() {
         out_pckt.type = PCKTYPE::TEXT;
         out_pckt = msg;
 
-        if(send_pckt(m_sock_fd, out_pckt) < 0) {
+        ssize_t bytes = send_pckt(m_sock_fd, out_pckt);
+        std::cout << bytes << std::endl;
+
+        if(bytes < 0) {
             std::cout << "Packet send failed: [ERROR] ";
             std::cout << strerror(errno) << std::endl;
         }
