@@ -9,6 +9,9 @@ void Client::start_connect() {
         std::cout << "Connected to " << inet_ntoa(m_addr.sin_addr);
         std::cout << " on port " << ntohs(m_addr.sin_port) << std::endl;
         connected = true;
+
+        send_tp.add([this]() { m_inaudio.startCapture(); });
+        recv_tp.add([this]() { m_outaudio.startAudioStream(); });
     } else {
         std::cout << "Connection failed: [ERROR] ";
         std::cout << strerror(errno) << std::endl;
@@ -27,8 +30,12 @@ void Client::start_recv() {
     ssize_t bytes = recv_pckt(m_sock_fd, out_pckt);
 
     if(bytes > 0 && connected) {
-        std::cout << "Received: " << out_pckt << std::endl;
-        std::thread([this]() { start_recv(); }).detach();
+        if(out_pckt.type == PCKTYPE::AUDIO) {
+            m_outaudio.receiveAudioData(out_pckt);
+        } else {
+            std::cout << "Received: " << out_pckt << std::endl;
+        }
+        recv_tp.add([this]() { start_recv(); });
     } else {
         if(bytes == 0) {
             std::cout << "Orderly shutdown from server" << std::endl;

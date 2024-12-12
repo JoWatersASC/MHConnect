@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../common/common.h"
+#include "threadpool.h"
 #include "audio.h"
 
 #include<memory>
@@ -13,9 +14,10 @@ namespace osf
 class Client {
 public:
     Client();
-    Client(int _fd, sockaddr_in& _addr) 
+    Client(int _fd, sockaddr_in& _addr, size_t _nthreads) 
     : m_sock_fd(std::move(_fd)), m_addr(std::move(_addr)),
-    connected(false), m_audio(m_sock_fd) {}
+    recv_tp(_nthreads / 3), send_tp(_nthreads * 2 / 3),
+    m_inaudio(m_sock_fd, send_tp), m_outaudio(m_sock_fd, recv_tp) {}
 
     void start_connect();
     void start_recv();
@@ -29,7 +31,11 @@ public:
 private:
     int m_sock_fd;
     sockaddr_in m_addr;
-    AudioStreamer m_audio;
+    AudioStreamer m_inaudio;
+    AudioReceiver m_outaudio;
+
+    ThreadPool recv_tp;
+    ThreadPool send_tp;
 
     packet m_pckt;
 
