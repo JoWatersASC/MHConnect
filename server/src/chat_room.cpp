@@ -7,12 +7,13 @@ void ChatRoom::broadcast(const packet p, const id_t& source_id) {
 
     std::cout << "FROM: " << source_id << std::endl;
     std::cout << "[MSG] " << p << std::endl;
-
+        
     for(Connection& _client : m_clients) {
         if(!(_client.getId() == source_id)) {
             _client.send_text(p);
         }
     }
+    
 }
 // void ChatRoom::broadcast(std::string msg) {
 //     std::cerr << "String broadcast" << std::endl;

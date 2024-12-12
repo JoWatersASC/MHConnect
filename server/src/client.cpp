@@ -8,6 +8,7 @@ void Connection::send_text(const packet p) {
 }
 
 void Connection::broadcast(const packet& p) {
+    std::unique_lock<std::mutex> lock(send_mtx);
     room.broadcast(p, id);
 }
 
@@ -20,7 +21,7 @@ void Connection::recv_text() {
     if(bytes <= 0)
         ::close(m_fd);
     else {
-        send_tp.add([&]() { broadcast(p); });
-        recv_tp.add([&]() { recv_text(); });
+        send_tp.add([p, this]() { broadcast(p); });
+        recv_tp.add([this]() { recv_text(); });
     }
 }
