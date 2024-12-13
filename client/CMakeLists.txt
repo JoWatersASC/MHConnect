@@ -1,5 +1,6 @@
 # Client side application
-# set(CMAKE_PREFIX_PATH "C:/sdk/lib/rtaudio")
+
+set(CMAKE_PREFIX_PATH "C:/sdk/lib/rtaudio")
 
 set(INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
@@ -8,8 +9,8 @@ set(HEADER_FILES "${INCLUDE_DIR}/client.h" "${INCLUDE_DIR}/audio.h")
 
 # find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
 
-if(Win32)
-    set(RTAUDIO_PATH "C:/sdk/lib/rtaudio/RELEASE")
+if(WIN32)
+    set(RTAUDIO_PATH "C:/sdk/lib/rtaudio/Release")
     set(RTAUDIO_INSTALLATION_PATH "C:/sdk/repos/rtaudio")
 endif()
 
