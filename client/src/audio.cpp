@@ -1,4 +1,4 @@
-#include "../include/audio.h"
+#include "audio.h"
 
 #include <algorithm>
 
@@ -22,16 +22,14 @@ void AudioStreamer::startCapture() {
             SAMPLE_RATE,           // Sample rate
             (unsigned int *)&BUFFER_FRAMES,        // Buffer frames
             &recordCallback,       // Callback function
-            this,                  // User data
-            nullptr,               // Stream options
-            nullptr                // Error callback
+            this               // Error callback
         );
 
         // Start audio stream
         m_audio.startStream();
     }
-    catch (RtAudioError& e) {
-        std::cerr << "RtAudio Error: " << e.getMessage() << std::endl;
+    catch (RtAudioErrorType& e) {
+        std::cerr << "RtAudio Error: " << e << std::endl;
         throw;
     }
 }
@@ -46,8 +44,8 @@ void AudioStreamer::stopCapture() {
             m_audio.closeStream();
         }
     }
-    catch (RtAudioError& e) {
-        std::cerr << "RtAudio Cleanup Error: " << e.getMessage() << std::endl;
+    catch (RtAudioErrorType& e) {
+        std::cerr << "RtAudio Cleanup Error: " << e << std::endl;
     }
 }
 
@@ -67,7 +65,7 @@ int AudioStreamer::recordCallback(void* out_buff, void* in_buff, unsigned int nu
     packet audio_pckt;
     audio_pckt.type = PCKTYPE::AUDIO;
     
-    size_t dataSize = std::min((uint)PACK_LEN, num_bframes * CHANNELS * BYTES_PER_SAMPLE);
+    size_t dataSize = std::min((unsigned int)PACK_LEN, num_bframes * CHANNELS * BYTES_PER_SAMPLE);
     std::memcpy(audio_pckt.data, in_buff, dataSize);
 
     // Send over network
