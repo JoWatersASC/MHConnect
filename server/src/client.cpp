@@ -19,7 +19,7 @@ void Connection::recv_text() {
     p.id = id;
 
     if (bytes <= 0) {
-#ifdef WIN32
+#ifdef _WIN32
         closesocket(m_fd);
 #else
         close(m_fd);
