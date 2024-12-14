@@ -1,19 +1,6 @@
 #pragma once
 
-#include<utility>
 #include<iostream>
-#include<string>
-#include<vector>
-#include<queue>
-#include<condition_variable>
-#include<thread>
-#include<mutex>
-#include<fstream>
-#include<algorithm>
-#include<cstring>
-#include<cctype>
-#include<cstdint>
-
 
 #ifdef _WIN32
 
@@ -36,6 +23,20 @@ constexpr int winsock_initialize(){
 
 #define socket_t int
 #endif
+
+#include<utility>
+#include<string>
+#include<vector>
+#include<queue>
+#include<condition_variable>
+#include<thread>
+#include<mutex>
+#include<fstream>
+#include<algorithm>
+#include<cstring>
+#include<cctype>
+#include<cstdint>
+
 
 #define DEBUG 0
 
