@@ -8,3 +8,4 @@ add_executable(${EX_NAME} main.cpp ${SOURCE_FILES} ${HEADER_FILES})
 set_target_properties(${EX_NAME} PROPERTIES OUTPUT_DIR "${CMAKE_BINARY_DIR}/bin")
 
 target_include_directories(${EX_NAME} PRIVATE ${INCLUDE_DIR} "${CMAKE_SOURCE_DIR}/common")
+target_link_libraries(${EX_NAME} INTERFACE commonlib)
