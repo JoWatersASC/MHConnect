@@ -1,9 +1,13 @@
 #pragma once
 
 #ifdef _WIN32
-#define _WINSOCKAPI_  // Prevent inclusion of winsock.h
+#define _WINSOCKAPI_
+#endif
+
 #include <RtAudio.h>
-#undef _WINSOCKAPI_   // Clean up
+
+#ifdef _WIN32
+#undef _WINSOCKAPI_
 #endif
 
 #include "common.h"
