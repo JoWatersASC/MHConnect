@@ -78,7 +78,11 @@ void Client::start_send() {
 void Client::close() {
     if(connected) {
         std::cout << "Shutting down client" << std::endl;
-        ::close(m_sock_fd);
+#ifdef _WIN32
+        closesocket(m_sock_fd);
+#else
+        close(m_sock_fd);
+#endif
     } else {
         std::cout << "Client already disconnected" << std::endl;
     }
