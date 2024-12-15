@@ -35,10 +35,17 @@ void AudioStreamer::startCapture() {
         // Start audio stream
         m_audio.startStream();
     }
+    #ifdef _WIN32
     catch (RtAudioErrorType& e) {
         std::cerr << "RtAudio Error: " << e << std::endl;
         throw;
     }
+    #else
+    catch (RtAudioError& e) {
+        std::cerr << "RtAudio Error: " << e.getMessage() << std::endl;
+        throw;
+    }
+    #endif
 }
 
 void AudioStreamer::stopCapture() {
@@ -51,9 +58,17 @@ void AudioStreamer::stopCapture() {
             m_audio.closeStream();
         }
     }
+    #ifdef _WIN32
     catch (RtAudioErrorType& e) {
-        std::cerr << "RtAudio Cleanup Error: " << e << std::endl;
+        std::cerr << "RtAudio Error: " << e << std::endl;
+        throw;
     }
+    #else
+    catch (RtAudioError& e) {
+        std::cerr << "RtAudio Error: " << e.getMessage() << std::endl;
+        throw;
+    }
+    #endif
 }
 
 int AudioStreamer::recordCallback(void* out_buff, void* in_buff, unsigned int num_bframes,
@@ -72,13 +87,9 @@ int AudioStreamer::recordCallback(void* out_buff, void* in_buff, unsigned int nu
     packet audio_pckt;
     audio_pckt.type = PCKTYPE::AUDIO;
     
-<<<<<<< HEAD
-    size_t dataSize = std::min((unsigned int)PACK_LEN, num_bframes * CHANNELS * BYTES_PER_SAMPLE);
-    std::memcpy(audio_pckt.data, in_buff, dataSize);
-=======
-    size_t dataSize = std::min((uint)PACK_LEN, num_bframes * INCHANNELS * BYTES_PER_SAMPLE);
+    size_t dataSize = std::min((unsigned int)PACK_LEN, num_bframes * INCHANNELS * BYTES_PER_SAMPLE);
+    // std::cout << dataSize << std::endl;
     std::memcpy(audio_pckt.data, reinterpret_cast<const Byte *>(in_buff), dataSize);
->>>>>>> 019f930 (Added INCHANNELS and OUTCHANNELS to audio files instaed of a single CHANNELS variable)
 
     // Send over network
     ssize_t bytes = send_pckt(streamer->m_sock_fd, audio_pckt);
@@ -158,8 +169,9 @@ int AudioReceiver::playbackCallback(void* out_buff, void* in_buff, unsigned int 
 
 void AudioReceiver::receiveAudioData(const packet& _pckt) {
     if (_pckt.type == PCKTYPE::AUDIO) {
+        size_t dataSize = std::min((int)PACK_LEN, 1024);
         const float* audioFloats = reinterpret_cast<const float*>(_pckt.data);
-        size_t floatCount = PACK_LEN / sizeof(float);
+        size_t floatCount = dataSize / sizeof(float);
 
         std::lock_guard<std::mutex> lock(m_bufferMutex);
         m_playbackBuffer.insert(
