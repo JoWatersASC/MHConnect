@@ -15,11 +15,11 @@ target_include_directories(${EX_NAME} PRIVATE ${INCLUDE_DIR} "${CMAKE_SOURCE_DIR
 if(UNIX)
 	find_package(PkgConfig REQUIRED)
     pkg_check_modules(RTAUDIO REQUIRED rtaudio)
-    target_link_libraries(${EX_NAME} ${RTAUDIO_LIBRARIES})
+    target_link_libraries(${EX_NAME} PRIVATE ${RTAUDIO_LIBRARIES})
     target_include_directories(${EX_NAME} PRIVATE ${RTAUDIO_INCLUDE_DIRS})
 endif()
 
-target_link_libraries(${EX_NAME} PUBLIC commonlib)
+target_link_libraries(${EX_NAME} INTERFACE commonlib)
 
 if(WIN32)
 	
