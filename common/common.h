@@ -6,15 +6,6 @@
 
 #include "MHwindows.h"
 
-constexpr int winsock_initialize(){
-    if (result != 0) {
-        std::cerr << "WSAStartup failed with error: " << result << std::endl;
-        return 1;  // Exit the program or handle the error appropriately
-    }
-    std::cout << "Winsock initialized successfully!" << std::endl;
-    return 0;
-}
-
 #elif defined(__linux__)
 #include<netinet/in.h>
 #include<unistd.h>
@@ -38,7 +29,7 @@ constexpr int winsock_initialize(){
 #include<cstdint>
 
 
-#define DEBUG 0
+#define DEBUG 1
 
 using Byte = unsigned char;
 constexpr uint16_t PACK_LEN = 2048;  
@@ -116,5 +107,5 @@ inline bool operator==(const sockaddr_in& a, const sockaddr_in& b) {
 }
 
 namespace osf {
-    static uint16_t PORT = 8000;
+    static uint16_t PORT = 16000;
 }
