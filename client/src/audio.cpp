@@ -7,12 +7,19 @@ using namespace osf;
 void AudioStreamer::startCapture() {
     RtAudio::DeviceInfo info;
     unsigned int inputDevice = m_audio.getDefaultInputDevice();
+
+    if (inputDevice == m_audio.getDeviceCount()) {
+        std::cerr << "Invalid default input device" << std::endl;
+        return;  // or handle error
+    }
     
     // Audio stream parameters
     RtAudio::StreamParameters inputParams;
     inputParams.deviceId = inputDevice;
-    inputParams.nChannels = CHANNELS;
+    inputParams.nChannels = INCHANNELS;
     inputParams.firstChannel = 0;
+
+    isCapturing = true;
 
     try {
         m_audio.openStream(
@@ -65,14 +72,20 @@ int AudioStreamer::recordCallback(void* out_buff, void* in_buff, unsigned int nu
     packet audio_pckt;
     audio_pckt.type = PCKTYPE::AUDIO;
     
+<<<<<<< HEAD
     size_t dataSize = std::min((unsigned int)PACK_LEN, num_bframes * CHANNELS * BYTES_PER_SAMPLE);
     std::memcpy(audio_pckt.data, in_buff, dataSize);
+=======
+    size_t dataSize = std::min((uint)PACK_LEN, num_bframes * INCHANNELS * BYTES_PER_SAMPLE);
+    std::memcpy(audio_pckt.data, reinterpret_cast<const Byte *>(in_buff), dataSize);
+>>>>>>> 019f930 (Added INCHANNELS and OUTCHANNELS to audio files instaed of a single CHANNELS variable)
 
     // Send over network
     ssize_t bytes = send_pckt(streamer->m_sock_fd, audio_pckt);
     
+    
     if (bytes < 0) {
-        std::cerr << "Network send failed" << std::endl;
+        std::cerr << "[ERROR] " << strerror(errno) << std::endl;
         streamer->isCapturing = false;
     }
     
@@ -95,8 +108,15 @@ void AudioReceiver::startAudioStream() {
 
     RtAudio::StreamParameters outputParams;
     outputParams.deviceId = m_audio.getDefaultOutputDevice();
-    outputParams.nChannels = CHANNELS;
+    outputParams.nChannels = OUTCHANNELS;
 
+    unsigned int outputDevice = m_audio.getDefaultOutputDevice();
+    if (outputDevice == m_audio.getDeviceCount()) {
+        std::cerr << "Invalid default input device" << std::endl;
+        return;  // or handle error
+    }
+
+    m_isReceiving = true;
     m_audio.openStream(
         &outputParams, nullptr, RTAUDIO_FLOAT32, SAMPLE_RATE, (unsigned int *)&BUFFER_FRAMES,
         &playbackCallback, this
@@ -121,22 +141,22 @@ int AudioReceiver::playbackCallback(void* out_buff, void* in_buff, unsigned int 
 
     std::lock_guard<std::mutex> lock(receiver->m_bufferMutex);
 
-    if (receiver->m_playbackBuffer.size() >= num_bframes * CHANNELS) {
+    if (receiver->m_playbackBuffer.size() >= num_bframes * OUTCHANNELS) {
         std::memcpy(out_buff, 
                     receiver->m_playbackBuffer.data(), 
-                    num_bframes * CHANNELS * sizeof(float));
+                    num_bframes * OUTCHANNELS * sizeof(float));
         receiver->m_playbackBuffer.erase(
             receiver->m_playbackBuffer.begin(), 
-            receiver->m_playbackBuffer.begin() + num_bframes * CHANNELS
+            receiver->m_playbackBuffer.begin() + num_bframes * OUTCHANNELS
         );
         return 0;
     }
 
-    memset(out_buff, 0, num_bframes * CHANNELS * sizeof(float));
+    memset(out_buff, 0, num_bframes * OUTCHANNELS * sizeof(float));
     return 0;
 }
 
-void AudioReceiver::receiveAudioData(const packet _pckt) {
+void AudioReceiver::receiveAudioData(const packet& _pckt) {
     if (_pckt.type == PCKTYPE::AUDIO) {
         const float* audioFloats = reinterpret_cast<const float*>(_pckt.data);
         size_t floatCount = PACK_LEN / sizeof(float);
