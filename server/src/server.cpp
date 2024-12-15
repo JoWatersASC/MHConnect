@@ -29,26 +29,36 @@ void Server::accept_client() {
 }
 
 void Server::start() {
-    //create socket
-    m_sock_fd = socket(AF_INET, SOCK_STREAM, 0);
+    m_sock_fd = socket(2, 1, IPPROTO_TCP);
 
-    //create sockaddr
     sockaddr_in server_addr{};
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = htons(PORT);
     server_addr.sin_addr.s_addr = INADDR_ANY;
 
-    //bind to port
+#ifdef _WIN32
+    if (bind(m_sock_fd, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr)) == SOCKET_ERROR)
+        std::cerr << "Error: " << WSAGetLastError() << '\n';
+    else
+        std::cout << "Server bound to port " << PORT << std::endl;
+
+    if(listen(m_sock_fd, 10) == SOCKET_ERROR)
+        std::cerr << "Error: " << WSAGetLastError() << '\n';
+    else
+        std::cout << "Started listening on port " << PORT << std::endl;
+#else
     if(!::bind(m_sock_fd, (sockaddr *)&server_addr, sizeof(server_addr)))
             std::cout << "Server bound to port " << PORT << std::endl;
     else
         std::cerr << strerror(errno) << std::endl;
 
-    //start listening on port
-    if(!::listen(m_sock_fd, 10))
+    if (!::listen(m_sock_fd, 10))
         std::cout << "Server started on port " << PORT << std::endl << std::endl;
     else
         std::cerr << strerror(errno) << std::endl;
+#endif
+
+    
     
     recv_tp.start();
     send_tp.start();

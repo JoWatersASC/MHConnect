@@ -5,8 +5,10 @@ using namespace osf;
 void ChatRoom::broadcast(const packet p, const id_t& source_id) {
     std::unique_lock<std::mutex> lock(m_mtx);
 
-    std::cout << "FROM: " << source_id << std::endl;
-    std::cout << "[MSG] " << p << std::endl;
+	if(p.type == PCKTYPE::TEXT) {
+		std::cout << "FROM: " << source_id << std::endl;
+		std::cout << "[MSG] " << p << std::endl;
+	}
         
     for(Connection& _client : m_clients) {
         if(!(_client.getId() == source_id)) {

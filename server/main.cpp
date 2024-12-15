@@ -10,9 +10,9 @@ if (winsock_initialize())
 		osf::PORT = std::stoi(argv[1]);
 	}
 	else {
-		osf::PORT = 8000;
+		osf::PORT = 16000;
 	}
-	std::cout << osf::PORT << std::endl;
+	//std::cout << osf::PORT << std::endl;
 	osf::Server s;
 	s.start();
 
