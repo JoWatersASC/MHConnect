@@ -10,14 +10,13 @@ void Client::start_connect() {
         std::cout << " on port " << ntohs(m_addr.sin_port) << std::endl;
         connected = true;
 
-        send_tp.add([this]() { m_inaudio.startCapture(); });
-        recv_tp.add([this]() { m_outaudio.startAudioStream(); });
+        m_inaudio.startCapture();
+        m_outaudio.startAudioStream(); 
     } else {
         std::cout << "Connection failed: [ERROR] ";
         std::cout << strerror(errno) << std::endl;
         close();
     }
-
 }
 
 void Client::start_recv() {
@@ -32,6 +31,7 @@ void Client::start_recv() {
     if(bytes > 0 && connected) {
         if(out_pckt.type == PCKTYPE::AUDIO) {
             m_outaudio.receiveAudioData(out_pckt);
+            // std::cerr << "received audio" << std::endl;
         } else {
             std::cout << "Received: " << out_pckt << std::endl;
         }
@@ -78,11 +78,17 @@ void Client::start_send() {
 void Client::close() {
     if(connected) {
         std::cout << "Shutting down client" << std::endl;
+<<<<<<< HEAD
 #ifdef _WIN32
         closesocket(m_sock_fd);
 #else
         close(m_sock_fd);
 #endif
+=======
+        m_inaudio.stopCapture();
+        m_outaudio.stop();
+        ::close(m_sock_fd);
+>>>>>>> a23bce0 (client constructor no longer 'moves' socket and starts thread pools in constructor and starts audio reception and transmission on main thread not dispatched thread)
     } else {
         std::cout << "Client already disconnected" << std::endl;
     }
