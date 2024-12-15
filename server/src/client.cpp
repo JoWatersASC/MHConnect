@@ -6,6 +6,10 @@ using namespace osf;
 void Connection::send_text(const packet p) {
     send_tp.add([this, &p]() { send_pckt(m_fd, p); });
 }
+void Connection::send_audio(const packet p) {
+	send_tp.add([this, &p]() { send_pckt(m_fd, p); });
+}
+
 
 void Connection::broadcast(const packet& p) {
     std::unique_lock<std::mutex> lock(send_mtx);
