@@ -78,17 +78,13 @@ void Client::start_send() {
 void Client::close() {
     if(connected) {
         std::cout << "Shutting down client" << std::endl;
-<<<<<<< HEAD
 #ifdef _WIN32
         closesocket(m_sock_fd);
 #else
-        close(m_sock_fd);
+        ::close(m_sock_fd);
 #endif
-=======
         m_inaudio.stopCapture();
         m_outaudio.stop();
-        ::close(m_sock_fd);
->>>>>>> a23bce0 (client constructor no longer 'moves' socket and starts thread pools in constructor and starts audio reception and transmission on main thread not dispatched thread)
     } else {
         std::cout << "Client already disconnected" << std::endl;
     }
