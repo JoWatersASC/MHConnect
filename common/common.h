@@ -133,5 +133,5 @@ inline bool operator==(const sockaddr_in& a, const sockaddr_in& b) {
 }
 
 namespace osf {
-    static uint16_t PORT = 16000;
+    inline uint16_t PORT = 16000;
 }
