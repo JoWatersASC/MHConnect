@@ -45,14 +45,7 @@ void ChatRoom::broadcast(const packet p, const id_t& source_id) {
 	}
     
 }
-// void ChatRoom::broadcast(std::string msg) {
-//     std::cerr << "String broadcast" << std::endl;
-//     packet p;
-//     p.type = PCKTYPE::TEXT;
-//     p = msg;
 
-//     broadcast(p, 0);
-// }
 
 void ChatRoom::add_client(socket_t _fd, sockaddr_in _addr) {
     std::unique_lock<std::mutex> lock(m_mtx);

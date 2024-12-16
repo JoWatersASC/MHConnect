@@ -46,6 +46,7 @@ void Server::start() {
         std::cerr << "Error: " << WSAGetLastError() << '\n';
     else
         std::cout << "Started listening on port " << PORT << std::endl;
+
 #else
     if(!::bind(m_sock_fd, (sockaddr *)&server_addr, sizeof(server_addr)))
             std::cout << "Server bound to port " << PORT << std::endl;

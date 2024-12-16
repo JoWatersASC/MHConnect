@@ -3,10 +3,10 @@
 
 using namespace osf;
 
-void Connection::send_text(const packet p) {
-    send_tp.add([this, &p]() {
+void Connection::send_text(packet p) {
+    send_tp.add([this, p = std::move(p)]() {
         std::unique_lock<std::mutex> lock(send_mtx); 
-        send_pckt(m_fd, p); 
+        send_pckt(m_fd, std::move(p)); 
     });
 }
 void Connection::send_audio(packet p) {
@@ -23,10 +23,14 @@ void Connection::broadcast(const packet& p) {
 }
 
 void Connection::recv_text() {
-    std::unique_lock<std::mutex> lock(recv_mtx);
     packet p;
+    ssize_t bytes;
 
-    ssize_t bytes = recv_pckt(m_fd, p);
+    {
+        std::lock_guard<std::mutex> lock(recv_mtx);
+        bytes = recv_pckt(m_fd, p);
+    }
+
     p.id = id;
 
     if (bytes <= 0) {
