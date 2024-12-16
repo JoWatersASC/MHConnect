@@ -22,7 +22,7 @@ public:
 
     void broadcast(const packet, const id_t&);
     void broadcast(std::string);
-    void add_client(int, sockaddr_in);
+    void add_client(socket_t, sockaddr_in);
 
 
 private:

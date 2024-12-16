@@ -1,6 +1,7 @@
 # ide files
 .vs/
 .vscode/
+out/
 
 # not this
 !.gitignore

@@ -2,29 +2,51 @@
 
 using namespace osf;
 
+#if DEBUG
+std::ofstream audioLog("audio_log.txt");
+std::ofstream textLog("text_log.txt");
+std::ofstream videoLog("video_log.txt");
+#endif
+
 void ChatRoom::broadcast(const packet p, const id_t& source_id) {
     std::unique_lock<std::mutex> lock(m_mtx);
 
-    std::cout << "FROM: " << source_id << std::endl;
-    std::cout << "[MSG] " << p << std::endl;
-        
-    for(Connection& _client : m_clients) {
-        if(!(_client.getId() == source_id)) {
-            _client.send_text(p);
-        }
-    }
+	if(p.type == PCKTYPE::TEXT) {
+		std::cout << "FROM: " << source_id << std::endl;
+		std::cout << "[MSG] " << p << std::endl;
+		#if DEBUG
+		textLog << "FROM: " << source_id << std::endl;
+		textLog << "[MSG] " << p << std::endl;
+		#endif
+	} 
+	#if DEBUG 
+	else if (p.type == PCKTYPE::AUDIO) {
+		audioLog << "Received: " << strlen(p.data) << " bytes of AUDIO data from " 
+			<< source_id << std::endl;
+	} else if (p.type == PCKTYPE::VIDEO) {
+		audioLog << "Received: " << strlen(p.data) << " bytes of VIDEO data from " 
+			<< source_id << std::endl;
+	}
+	#endif
+    
+	if(p.type == PCKTYPE::TEXT) {
+		for(Connection& _client : m_clients) {
+			if(!(_client.getId() == source_id)) {
+				_client.send_text(p);
+			}
+		}
+	}
+	if(p.type == PCKTYPE::AUDIO) {
+		for(Connection& _client : m_clients) {
+			if(!(_client.getId() == source_id)) {
+				_client.send_audio(p);
+			}
+		}
+	}
     
 }
-// void ChatRoom::broadcast(std::string msg) {
-//     std::cerr << "String broadcast" << std::endl;
-//     packet p;
-//     p.type = PCKTYPE::TEXT;
-//     p = msg;
 
-//     broadcast(p, 0);
-// }
-
-void ChatRoom::add_client(int _fd, sockaddr_in _addr) {
+void ChatRoom::add_client(socket_t _fd, sockaddr_in _addr) {
     std::unique_lock<std::mutex> lock(m_mtx);
 
     id_t new_client_id;
@@ -34,7 +56,7 @@ void ChatRoom::add_client(int _fd, sockaddr_in _addr) {
     } while(client_ids.count(new_client_id));
     
     m_clients.emplace_back(recv_tp, send_tp, *this, 
-        std::move(_fd), std::move(_addr), new_client_id);
+        std::move(_fd), _addr, new_client_id);
 
     std::cout << "New client connected: ip-" << inet_ntoa(_addr.sin_addr) << std::endl;
 

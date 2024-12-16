@@ -12,7 +12,7 @@ class ChatRoom;
 class Connection {
 public:
     Connection() = delete;
-    Connection(ThreadPool& r_tp, ThreadPool& s_tp, ChatRoom& _room, int _fd, sockaddr_in _addr, ssize_t _id)
+    Connection(ThreadPool& r_tp, ThreadPool& s_tp, ChatRoom& _room, socket_t _fd, sockaddr_in _addr, ssize_t _id)
     : recv_tp(r_tp), send_tp(s_tp), room(_room), m_fd(_fd), m_addr(_addr), id(_id) {}
 
     Connection(Connection&& other) noexcept 
@@ -27,6 +27,8 @@ public:
 
     void broadcast(const packet& p);
     void send_text(const packet p);
+	void send_audio(const packet p);
+	
     void recv_text();
 
     std::string getIp() {
@@ -58,7 +60,7 @@ private:
     std::mutex recv_mtx;
 
     const id_t id;
-    const int m_fd;
+    const socket_t m_fd;
     const sockaddr_in m_addr;
     int m_err;
     std::atomic<bool> connected;
