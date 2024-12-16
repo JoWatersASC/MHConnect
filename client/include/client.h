@@ -3,6 +3,7 @@
 #include "../../common/common.h"
 #include "threadpool.h"
 #include "audio.h"
+#include "core.h"
 
 #include<memory>
 #include<algorithm>

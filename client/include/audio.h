@@ -13,6 +13,8 @@
 #include "common.h"
 #include "threadpool.h"
 
+#include "core.h"
+
 namespace osf
 {
 
