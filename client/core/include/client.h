@@ -27,8 +27,9 @@ public:
     void start_recv();
     void start_send();
 
-    void start_audio_in();
-    void start_audio_out();
+    //GIT CHANGE, defined below 2 functions
+    void start_audio_in() { m_inaudio.startCapture(); }
+    void start_audio_out() { m_outaudio.startAudioStream(); }
     
     void close();
 
