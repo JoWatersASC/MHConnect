@@ -5,7 +5,7 @@ set(CMAKE_PREFIX_PATH "C:/sdk/lib/rtaudio")
 set(INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 set(SOURCE_FILES src/client.cpp src/audio.cpp)
-set(HEADER_FILES "${INCLUDE_DIR}/client.h" "${INCLUDE_DIR}/audio.h")
+set(HEADER_FILES "${INCLUDE_DIR}/client.h" "${INCLUDE_DIR}/audio.h" "${INCLUDE_DIR}/core.h")
 
 set(EX_NAME "MHConnect")
 add_executable(${EX_NAME} main.cpp ${SOURCE_FILES} ${HEADER_FILES})
