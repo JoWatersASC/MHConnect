@@ -24,12 +24,12 @@ void Server::accept_client() {
         LocalFree(error_message);
     }
 #endif
-    SOCKET p;
+    socket_t p;
     m_room.add_client(std::move(client_fd), std::move(c_addr));
 }
 
 void Server::start() {
-    m_sock_fd = socket(2, 1, IPPROTO_TCP);
+    m_sock_fd = socket(AF_INET, SOCK_STREAM, 0);
 
     sockaddr_in server_addr{};
     server_addr.sin_family = AF_INET;
