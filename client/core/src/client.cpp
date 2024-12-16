@@ -88,7 +88,6 @@ void Client::start_send() {
 void Client::close() {
     if(connected) {
         std::cout << "Shutting down client" << std::endl;
-<<<<<<< Updated upstream
 #ifdef _WIN32
         closesocket(m_sock_fd);
 #else
@@ -96,9 +95,6 @@ void Client::close() {
 #endif
         m_inaudio.stopCapture();
         m_outaudio.stop();
-=======
-        close(m_sock_fd);
->>>>>>> Stashed changes
     } else {
         std::cout << "Client already disconnected" << std::endl;
     }
