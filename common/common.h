@@ -29,7 +29,7 @@
 #include<cstdint>
 
 
-#define DEBUG 1
+#define DEBUG 0
 
 using Byte = unsigned char;
 constexpr uint16_t PACK_LEN = 2048;  
@@ -63,16 +63,36 @@ inline packet createPacket(const std::string& message) {
 }
 
 inline ssize_t send_pckt(const socket_t socket_fd, const packet& p) {
-    ssize_t bytes = send(socket_fd, &p, sizeof(packet), 0);
-    return bytes;
+    ssize_t bytes_sent = 0;
+    ssize_t bytes;
+
+    while (bytes_sent < sizeof(packet)) {
+        bytes = send(socket_fd, (Byte*)&p + bytes_sent, sizeof(packet) - bytes_sent, 0);
+
+        if (bytes <= 0) {
+            std::cerr << "[SERVER] " << strerror(errno) << std::endl;
+            break;
+        }
+        bytes_sent += bytes;
+    }
+
+    return bytes_sent;
 }
 inline ssize_t recv_pckt(const socket_t socket_fd, packet& p) {
-    ssize_t bytes = 0;
+    ssize_t bytes_received = 0;
+    ssize_t bytes;
 
-    while (bytes < sizeof(packet)) {
-       bytes = recv(socket_fd, &p + bytes, sizeof(packet) - bytes, 0);
+    while (bytes_received < sizeof(packet)) {
+        bytes = recv(socket_fd, &p + bytes_received, sizeof(packet) - bytes_received, 0);
+
+        if (bytes <= 0) {
+            std::cerr << "[SERVER] " << strerror(errno) << std::endl;
+            break;
+        }
+        bytes_received += bytes;
     }
-    return bytes;
+
+    return bytes_received;
 }
 
 inline std::ostream& operator<<(std::ostream& out, const packet& p) {
