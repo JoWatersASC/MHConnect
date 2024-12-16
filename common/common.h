@@ -37,11 +37,12 @@ constexpr uint16_t PACK_LEN = 2048;
 enum class PCKTYPE : short { DEFAULT, TEXT, AUDIO, VIDEO };
 
 struct packet {
-    PCKTYPE type = PCKTYPE::TEXT;
-    uint32_t id = 0;
+    PCKTYPE type;
+    uint32_t id;
     char data[PACK_LEN];
 
-    packet() {
+    packet() : id(0) {
+        type = PCKTYPE::DEFAULT;
         memset(data, 0, PACK_LEN);
     }
 
@@ -61,12 +62,17 @@ inline packet createPacket(const std::string& message) {
     return p;
 }
 
-inline ssize_t send_pckt(const int socket_fd, const packet& p) {
+inline ssize_t send_pckt(const socket_t socket_fd, const packet& p) {
     ssize_t bytes = send(socket_fd, &p, sizeof(packet), 0);
     return bytes;
 }
-inline ssize_t recv_pckt(const int socket_fd, packet& p) {
-  return recv(socket_fd, &p, sizeof(packet), 0);
+inline ssize_t recv_pckt(const socket_t socket_fd, packet& p) {
+    ssize_t bytes = 0;
+
+    while (bytes < sizeof(packet)) {
+       bytes = recv(socket_fd, &p + bytes, sizeof(packet) - bytes, 0);
+    }
+    return bytes;
 }
 
 inline std::ostream& operator<<(std::ostream& out, const packet& p) {
