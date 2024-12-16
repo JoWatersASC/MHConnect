@@ -2,32 +2,13 @@
 
 using namespace osf;
 
-#if DEBUG
-std::ofstream audioLog("audio_log.txt");
-std::ofstream textLog("text_log.txt");
-std::ofstream videoLog("video_log.txt");
-#endif
-
 void ChatRoom::broadcast(const packet p, const id_t& source_id) {
     std::unique_lock<std::mutex> lock(m_mtx);
 
 	if(p.type == PCKTYPE::TEXT) {
 		std::cout << "FROM: " << source_id << std::endl;
 		std::cout << "[MSG] " << p << std::endl;
-		#if DEBUG
-		textLog << "FROM: " << source_id << std::endl;
-		textLog << "[MSG] " << p << std::endl;
-		#endif
-	} 
-	#if DEBUG 
-	else if (p.type == PCKTYPE::AUDIO) {
-		audioLog << "Received: " << strlen(p.data) << " bytes of AUDIO data from " 
-			<< source_id << std::endl;
-	} else if (p.type == PCKTYPE::VIDEO) {
-		audioLog << "Received: " << strlen(p.data) << " bytes of VIDEO data from " 
-			<< source_id << std::endl;
 	}
-	#endif
     
 	if(p.type == PCKTYPE::TEXT) {
 		for(Connection& _client : m_clients) {
