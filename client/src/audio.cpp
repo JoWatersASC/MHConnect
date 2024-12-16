@@ -92,7 +92,11 @@ int AudioStreamer::recordCallback(void* out_buff, void* in_buff, unsigned int nu
     std::memcpy(audio_pckt.data, reinterpret_cast<const Byte *>(in_buff), dataSize);
 
     // Send over network
-    ssize_t bytes = send_pckt(streamer->m_sock_fd, audio_pckt);
+    ssize_t bytes;
+    {
+        lockg send_lock(send_mtx);
+        bytes = send_pckt(streamer->m_sock_fd, audio_pckt);
+    }
     
     
     if (bytes < 0) {
@@ -145,12 +149,14 @@ void AudioReceiver::stop() {
     }
 }
 
+std::ofstream logger("logger.txt");
 int AudioReceiver::playbackCallback(void* out_buff, void* in_buff, unsigned int num_bframes,
     double streamTime, RtAudioStreamStatus status, void* userData) 
 {
     AudioReceiver* receiver = static_cast<AudioReceiver*>(userData);
 
     std::lock_guard<std::mutex> lock(receiver->m_bufferMutex);
+    // logger << "received audio " << _pckt << std::endl;
 
     if (receiver->m_playbackBuffer.size() >= num_bframes * OUTCHANNELS) {
         std::memcpy(out_buff, 
