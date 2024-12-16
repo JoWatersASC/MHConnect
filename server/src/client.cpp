@@ -5,20 +5,19 @@ using namespace osf;
 
 void Connection::send_text(packet p) {
     send_tp.add([this, p = std::move(p)]() {
-        std::unique_lock<std::mutex> lock(send_mtx); 
+        std::lock_guard<std::mutex> lock(send_mtx); 
         send_pckt(m_fd, std::move(p)); 
     });
 }
 void Connection::send_audio(packet p) {
 	send_tp.add([this, p = std::move(p)]() {
-        std::unique_lock<std::mutex> lock(send_mtx); 
+        std::lock_guard<std::mutex> lock(send_mtx); 
         send_pckt(m_fd, std::move(p)); 
     });
 }
 
 
 void Connection::broadcast(const packet& p) {
-    std::unique_lock<std::mutex> lock(send_mtx);
     room.broadcast(p, id);
 }
 

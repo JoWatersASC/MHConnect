@@ -46,7 +46,6 @@ void ChatRoom::broadcast(const packet p, const id_t& source_id) {
     
 }
 
-
 void ChatRoom::add_client(socket_t _fd, sockaddr_in _addr) {
     std::unique_lock<std::mutex> lock(m_mtx);
 
