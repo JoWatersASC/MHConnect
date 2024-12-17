@@ -3,7 +3,7 @@
 
 using namespace osf;
 
-void Client::start_connect() {
+bool Client::start_connect() {
     int res = ::connect(m_sock_fd, (sockaddr *)&m_addr, sizeof(m_addr));
 
     if(res == 0) {
@@ -16,7 +16,10 @@ void Client::start_connect() {
         std::cout << "Connection failed: [ERROR] ";
         std::cout << strerror(errno) << std::endl;
         close();
+        return false;
     }
+
+    return true;
 }
 
 void Client::start_recv() {

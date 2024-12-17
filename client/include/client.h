@@ -9,10 +9,10 @@
 #include<algorithm>
 #include<atomic>
 
+class Interface;
+
 namespace osf
 {
-
-class Interface;
 
 class Client {
 public:
@@ -25,7 +25,7 @@ public:
         recv_tp.start();
     }
 
-    void start_connect();
+    bool start_connect();
     void start_recv();
     void start_send();
 	void start_send(const std::string& msg);
