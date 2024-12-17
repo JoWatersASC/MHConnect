@@ -1,84 +1,97 @@
 #include "gui.h"
 
-using namespace osf;
+MainFrame::MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style) : wxFrame(parent, id, title, pos, size, style)
+{
+	this->SetSizeHints(wxDefaultSize, wxDefaultSize);
 
-MyFrame1::MyFrame1( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) 
-	: wxFrame( parent, id, title, pos, size, style ) {
-	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
+	wxBoxSizer* bSizer1;
+	bSizer1 = new wxBoxSizer(wxHORIZONTAL);
 
-	wxBoxSizer* MainBox;
-	MainBox = new wxBoxSizer( wxHORIZONTAL );
+	bSizer1->SetMinSize(wxSize(800, 600));
+	m_usrpanel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
+	wxBoxSizer* susr_box;
+	susr_box = new wxBoxSizer(wxVERTICAL);
 
-	MainBox->SetMinSize( wxSize( 800,600 ) );
-	wxBoxSizer* ClientBox;
-	ClientBox = new wxBoxSizer( wxVERTICAL );
+	m_bitmap1 = new wxStaticBitmap(m_usrpanel, wxID_ANY, wxNullBitmap, wxDefaultPosition, wxDefaultSize, 0);
+	m_bitmap1->SetMinSize(wxSize(500, 500));
 
-	ClientBox->SetMinSize( wxSize( 550,500 ) );
-	vid_box = new wxStaticBitmap( this, wxID_ANY, wxNullBitmap, wxDefaultPosition, wxDefaultSize, 0 );
-	vid_box->SetMinSize( wxSize( 500,500 ) );
-
-	ClientBox->Add( vid_box, 0, wxALL, 5 );
+	susr_box->Add(m_bitmap1, 0, wxALL, 5);
 
 	wxBoxSizer* input_bar;
-	input_bar = new wxBoxSizer( wxHORIZONTAL );
+	input_bar = new wxBoxSizer(wxHORIZONTAL);
 
-	inputField = new wxTextCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
-	inputField->SetMinSize( wxSize( 450,50 ) );
+	m_txtctrl = new wxTextCtrl(m_usrpanel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
+	m_txtctrl->SetMinSize(wxSize(450, 50));
 
-	input_bar->Add( inputField, 0, wxALL, 5 );
+	input_bar->Add(m_txtctrl, 0, wxALL, 5);
 
-	submitBtn = new wxButton( this, wxID_ANY, _("Send"), wxDefaultPosition, wxDefaultSize, 0 );
-	input_bar->Add( submitBtn, 0, wxALL, 5 );
+	m_sendbtn = new wxButton(m_usrpanel, wxID_ANY, _("Send"), wxDefaultPosition, wxDefaultSize, 0);
+	m_sendbtn->SetMinSize(wxSize(75, -1));
 
-
-	ClientBox->Add( input_bar, 1, wxEXPAND, 5 );
-
-
-	MainBox->Add( ClientBox, 1, wxEXPAND, 5 );
-
-	chat_list = new wxListBox( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, NULL, 0 );
-	chat_list->SetMinSize( wxSize( 250,550 ) );
-
-	MainBox->Add( chat_list, 0, wxALL, 5 );
+	input_bar->Add(m_sendbtn, 0, wxALL, 5);
 
 
-	this->SetSizer( MainBox );
+	susr_box->Add(input_bar, 1, wxEXPAND, 5);
+
+
+	m_usrpanel->SetSizer(susr_box);
+	m_usrpanel->Layout();
+	susr_box->Fit(m_usrpanel);
+	bSizer1->Add(m_usrpanel, 1, wxEXPAND | wxALL, 5);
+
+	m_panel2 = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
+	m_panel2->SetMinSize(wxSize(250, 550));
+
+	wxStaticBoxSizer* sbSizer2;
+	sbSizer2 = new wxStaticBoxSizer(new wxStaticBox(m_panel2, wxID_ANY, _("Chat List")), wxVERTICAL);
+
+	m_chatbox = new wxTextCtrl(sbSizer2->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize,
+		wxTE_MULTILINE | wxTE_READONLY | wxTE_WORDWRAP);
+	m_chatbox->SetMinSize(wxSize(250, 550));
+
+	sbSizer2->Add(m_chatbox, 0, wxALL | wxEXPAND, 5);
+
+
+	m_panel2->SetSizer(sbSizer2);
+	m_panel2->Layout();
+	sbSizer2->Fit(m_panel2);
+	bSizer1->Add(m_panel2, 1, wxEXPAND | wxALL, 5);
+
+
+	this->SetSizer(bSizer1);
 	this->Layout();
 
-	this->Centre( wxBOTH );
+	this->Centre(wxBOTH);
 
 	// Connect Events
-	inputField->Connect( wxEVT_KEY_DOWN, wxKeyEventHandler( MyFrame1::submit_msg ), NULL, this );
-	submitBtn->Connect( wxEVT_LEFT_DOWN, wxMouseEventHandler( MyFrame1::submit_msg ), NULL, this );
+	m_txtctrl->Connect(wxEVT_COMMAND_TEXT_ENTER, wxCommandEventHandler(MainFrame::submit_msg), NULL, this);
+	m_sendbtn->Connect(wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler(MainFrame::submit_msg), NULL, this);
 }
 
-MyFrame1::~MyFrame1()
+MainFrame::~MainFrame()
 {
 }
-
 Interface::Interface(wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style) 
-	: MyFrame1(parent, id, title, pos, size, style) {}
+	: MainFrame(parent, id, title, pos, size, style) {}
 	
-void Interface::submit_msg(wxKeyEvent& event) {
-	if(!inputField->GetValue().IsEmpty()) {
-		if(event.GetKeyCode() != WXK_RETURN)
-			return;
-		
-		std::string text = inputField->GetValue().ToStdString();
+void Interface::submit_msg(wxCommandEvent& event) {
+	if (!m_txtctrl->GetValue().IsEmpty()) {
+		std::string text = m_txtctrl->GetValue().ToStdString();
+
 		m_client->start_send(text);
-		inputField->Clear();
+		text = "[YOU] " + text;
+		add_text(text);
+
+		m_txtctrl->Clear();
 	}
 }
-void Interface::submit_msg(wxMouseEvent& event) {
-	if(!inputField->GetValue().IsEmpty()) {
-		std::string text = inputField->GetValue().ToStdString();
-		m_client->start_send(text);
-		inputField->Clear();
-	}
-}
+
 void Interface::add_text(std::string& _msg) {
-	this->chat_list->Append(_msg);
+	this->m_chatbox->AppendText(_msg);
+	this->m_chatbox->AppendText('\n');
+	this->m_chatbox->ShowPosition(m_chatbox->GetLastPosition());
 }
+
 
 bool Application::OnInit() {
 #ifdef _WIN32
@@ -89,14 +102,16 @@ bool Application::OnInit() {
 	int cl_fd = socket(AF_INET, SOCK_STREAM, 0);
 	sockaddr_in serv_addr;
 
-	serv_addr = create_address("127.0.0.1", 16000);
+	serv_addr = osf::create_address("127.0.0.1", 16000);
 
-	Client firstc(cl_fd, serv_addr, 6);
+	osf::Client firstc(cl_fd, serv_addr, 6);
 
-	firstc.start_connect();
+	if (!firstc.start_connect())
+		return 1;
+
 	firstc.start_recv();
 
-	Interface* _gui = new Interface(nullptr);
+	Interface* _gui = new Interface(nullptr, wxID_ANY, "MHConnect");
 	_gui->Show(true);
 
 	_gui->m_client = &firstc;

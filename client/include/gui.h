@@ -1,5 +1,7 @@
 #pragma once
 
+#include "client.h"
+
 #include <wx/wx.h>
 
 #include <wx/artprov.h>
@@ -17,57 +19,54 @@
 #include <wx/textctrl.h>
 #include <wx/button.h>
 #include <wx/sizer.h>
-#include <wx/listbox.h>
+#include <wx/panel.h>
+#include <wx/statbox.h>
 #include <wx/frame.h>
-
-#include "client.h"
 
 ///////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////////
-/// Class MyFrame1
+/// Class MainFrame
 ///////////////////////////////////////////////////////////////////////////////
-
-namespace osf
+class MainFrame : public wxFrame
 {
+private:
 
-class MyFrame1 : public wxFrame
-{
-	private:
+protected:
+	wxPanel* m_usrpanel;
+	wxStaticBitmap* m_bitmap1;
+	wxTextCtrl* m_txtctrl;
+	wxButton* m_sendbtn;
+	wxPanel* m_panel2;
+	wxTextCtrl* m_chatbox;
 
-	protected:
-		wxStaticBitmap* vid_box;
-		wxTextCtrl* inputField;
-		wxButton* submitBtn;
-		wxListBox* chat_list;
-
-		// Virtual event handlers, override them in your derived class
-		virtual void submit_msg( wxKeyEvent& event ) { event.Skip(); }
-		virtual void submit_msg( wxMouseEvent& event ) { event.Skip(); }
+	// Virtual event handlers, override them in your derived class
+	virtual void submit_msg(wxCommandEvent& event) { event.Skip(); }
 
 
-	public:
+public:
 
-		MyFrame1( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 800,600 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL|wxMODERN );
+	MainFrame(wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize(800, 600), long style = wxDEFAULT_FRAME_STYLE | wxTAB_TRAVERSAL);
 
-		~MyFrame1();
+	~MainFrame();
 
 };
 
-class Interface : public MyFrame1 {
+
+class Interface : public MainFrame {
 public:
-	Interface(wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, 
+	Interface(wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = "MHConnect",
 		const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 800,600 ), 
 		long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL|wxMODERN );
 
 	
-	Client* m_client;
+	osf::Client* m_client;
 	void add_text(std::string&);
 	
 private:
 	
-	virtual void submit_msg( wxKeyEvent& event ) override;
-	virtual void submit_msg( wxMouseEvent& event ) override;
+
+	virtual void submit_msg(wxCommandEvent& event);
 	
 };
 
@@ -75,5 +74,3 @@ class Application : public wxApp{
 	public:
 		virtual bool OnInit() override;
 };
-
-}
