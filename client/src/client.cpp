@@ -1,4 +1,5 @@
 #include "../include/client.h"
+#include "gui.h"
 
 using namespace osf;
 
@@ -37,6 +38,10 @@ void Client::start_recv() {
             m_outaudio.receiveAudioData(out_pckt);
         } else if (out_pckt.type == PCKTYPE::TEXT){
             std::cout << "Received: " << out_pckt << std::endl;
+			msg_queue.enqueue(out_pckt);
+
+            std::string _msg(msg_queue.pop_front().data);
+			m_gui->add_text(_msg);
         }
         recv_tp.add([this]() { start_recv(); });
     } else {
@@ -60,35 +65,35 @@ void Client::start_send() {
     std::string msg;
     std::cout << "[YOU] ";
 
-    m_inaudio.startCapture();
-
     while(std::getline(std::cin, msg) && connected) {
-        packet out_pckt{};
-        out_pckt.type = PCKTYPE::TEXT;
-        out_pckt = msg;
-
-        ssize_t bytes;
-
-        {
-            std::lock_guard<std::mutex> send_lock(send_mtx);
-            bytes = send_pckt(m_sock_fd, out_pckt);
-        }
-
-        if(bytes < 0) {
-            std::cout << "Packet send failed: [ERROR] ";
-            std::cout << strerror(errno) << std::endl;
-        }
+        start_send(msg);
         
         std::cout << "[YOU] ";
     }
 
     close();
 }
+void Client::start_send(const std::string& _msg) {
+	packet out_pckt{};
+	out_pckt.type = PCKTYPE::TEXT;
+	out_pckt = _msg;
+
+	ssize_t bytes;
+
+	{
+		std::lock_guard<std::mutex> send_lock(send_mtx);
+		bytes = send_pckt(m_sock_fd, out_pckt);
+	}
+
+	if(bytes < 0) {
+		std::cout << "Packet send failed: [ERROR] ";
+		std::cout << strerror(errno) << std::endl;
+	}
+}
 
 void Client::close() {
     if(connected) {
         std::cout << "Shutting down client" << std::endl;
-<<<<<<< Updated upstream
 #ifdef _WIN32
         closesocket(m_sock_fd);
 #else
@@ -96,9 +101,6 @@ void Client::close() {
 #endif
         m_inaudio.stopCapture();
         m_outaudio.stop();
-=======
-        close(m_sock_fd);
->>>>>>> Stashed changes
     } else {
         std::cout << "Client already disconnected" << std::endl;
     }

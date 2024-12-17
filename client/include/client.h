@@ -12,6 +12,8 @@
 namespace osf
 {
 
+class Interface;
+
 class Client {
 public:
     Client();
@@ -26,12 +28,19 @@ public:
     void start_connect();
     void start_recv();
     void start_send();
+	void start_send(const std::string& msg);
 
     //GIT CHANGE, defined below 2 functions
     void start_audio_in() { m_inaudio.startCapture(); }
     void start_audio_out() { m_outaudio.startAudioStream(); }
+	
+	const packet poll_msgs() { return msg_queue.pop_front(); }
+	const bool pollable() { return msg_queue.empty(); }
     
     void close();
+	
+	Interface* m_gui;
+	
 
 private:
     int m_sock_fd;
@@ -41,6 +50,7 @@ private:
 
     ThreadPool recv_tp;
     ThreadPool send_tp;
+	tqueue<packet> msg_queue;
 
     packet m_pckt;
 

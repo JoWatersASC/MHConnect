@@ -1,11 +1,14 @@
 #include "client.h"
+#include "gui.h"
 
-using namespace osf;
+#define HEADLESS 0
+
+#if HEADLESS
 
 int main(int argc, char* argv[]) {
 #ifdef _WIN32
-if (winsock_initialize())
-    return 1;
+	if (winsock_initialize())
+		return 1;
 #endif
 
     int cl_fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -16,12 +19,12 @@ if (winsock_initialize())
     else 
         serv_addr = create_address("127.0.0.1", 16000);
 
-
     Client firstc(cl_fd, serv_addr, 6);
+	
     firstc.start_connect();
-
     firstc.start_recv();
     firstc.start_send();
+	
 
     firstc.close();
 
@@ -29,3 +32,17 @@ if (winsock_initialize())
     WSACleanup();
 #endif
 }
+
+#else
+	
+
+using namespace osf;
+
+#ifdef _WIN32
+#define main 
+
+#endif
+
+wxIMPLEMENT_APP(Application);
+
+#endif
