@@ -7,14 +7,12 @@ set(CMAKE_PREFIX_PATH "$ENV{SDK}/lib/rtaudio")
 set(SOURCE_FILES
     src/client.cpp
     src/audio.cpp
-    src/gui.cpp
 )
 
 set(HEADER_FILES
     "${INCLUDE_DIR}/client.h"
     "${INCLUDE_DIR}/audio.h"
     "${INCLUDE_DIR}/core.h"
-    "${INCLUDE_DIR}/gui.h"
 )
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
@@ -76,7 +74,7 @@ elseif(WIN32)
     endif()
 endif()
 
-add_executable(${EX_NAME} main.cpp)
+add_executable(${EX_NAME} main.cpp "${INCLUDE_DIR}/gui.h" src/gui.cpp)
 target_link_libraries(${EX_NAME} PRIVATE ${LIB_NAME})
 
 if(WIN32)
