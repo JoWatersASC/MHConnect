@@ -38,17 +38,17 @@ MainFrame::MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, con
 	susr_box->Fit(m_usrpanel);
 	bSizer1->Add(m_usrpanel, 1, wxEXPAND | wxALL, 5);
 
-	m_panel2 = new wxPanel(this, wxID_ANY | wxEXPAND, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
+	m_panel2 = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
 	m_panel2->SetMinSize(wxSize(250, 550));
 
 	wxStaticBoxSizer* sbSizer2;
 	sbSizer2 = new wxStaticBoxSizer(new wxStaticBox(m_panel2, wxID_ANY, _("Chat List")), wxVERTICAL);
 
-	m_chatbox = new wxTextCtrl(sbSizer2->GetStaticBox(), wxID_ANY | wxEXPAND, wxEmptyString, wxDefaultPosition, wxDefaultSize,
+	m_chatbox = new wxTextCtrl(sbSizer2->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize,
 		wxTE_MULTILINE | wxTE_READONLY | wxTE_WORDWRAP);
 	m_chatbox->SetMinSize(wxSize(250, 550));
 
-	sbSizer2->Add(m_chatbox, 0, wxALL | wxEXPAND, 5);
+	sbSizer2->Add(m_chatbox, 0, wxALL, 5);
 
 
 	m_panel2->SetSizer(sbSizer2);
