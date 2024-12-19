@@ -13,7 +13,7 @@ class Interface;
 
 namespace osf
 {
-
+    
 class Client {
 public:
     Client();
@@ -38,9 +38,6 @@ public:
 	const bool pollable() { return msg_queue.empty(); }
     
     void close();
-	
-	Interface* m_gui;
-	
 
 private:
     int m_sock_fd;
@@ -50,12 +47,34 @@ private:
 
     ThreadPool recv_tp;
     ThreadPool send_tp;
-	tqueue<packet> msg_queue;
 
     packet m_pckt;
 
     std::atomic<bool> connected;
+	
+	tqueue<packet> msg_queue;
 
+public:
+    class listener {
+    public:
+        virtual ~listener() {}
+        virtual void onNotify(const packet&) = 0;
+    };
+
+    void addListener(listener* _listener) { listeners.push_back(_listener); }
+
+private:
+    std::vector<listener*> listeners;
+
+    void notify() {
+        if (!pollable())
+            return;
+
+        const packet p = msg_queue.pop_front();
+        for (auto& listener : listeners) {
+            listener->onNotify(p);
+        }
+    }
 };
 
 inline sockaddr_in create_address(std::string ip, int port) {
