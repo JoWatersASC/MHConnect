@@ -27,7 +27,7 @@ target_include_directories(${LIB_NAME} PUBLIC ${INCLUDE_DIR} "${CMAKE_SOURCE_DIR
 # find_package(wxWidgets REQUIRED)
 
 if(UNIX)
-        find_package(PkgConfig REQUIRED)
+    find_package(PkgConfig REQUIRED)
     pkg_check_modules(RTAUDIO REQUIRED rtaudio)
     target_link_libraries(${LIB_NAME} PUBLIC ${RTAUDIO_LIBRARIES})
     target_include_directories(${LIB_NAME} PUBLIC ${RTAUDIO_INCLUDE_DIRS})
@@ -91,6 +91,22 @@ if(WIN32)
 		# set(SELECTED_WX_LIBS ${WX_DLIBS})
 		target_link_libraries(${LIB_NAME} PUBLIC ${WX_DLIBS} INTERFACE ${WX_DLIBS})
 
+elseif(UNIX)
+    find_package(wxWidgets REQUIRED COMPONENTS core base)
+	include(${wxWidgets_USE_FILE})
+	execute_process(COMMAND wx-config --cxxflags OUTPUT_VARIABLE WX_CXXFLAGS OUTPUT_STRIP_TRAILING_WHITESPACE)
+	execute_process(COMMAND wx-config --libs OUTPUT_VARIABLE WX_LIBS OUTPUT_STRIP_TRAILING_WHITESPACE)
+		
+    target_link_libraries(${LIB_NAME} PRIVATE ${wxWidgets_LIBRARIES})
+    target_include_directories(${LIB_NAME} PUBLIC ${wxWidgets_INCLUDE_DIRS}) 
+	target_compile_options(${LIB_NAME} PUBLIC ${WX_CXXFLAGS})
+	target_link_libraries(${LIB_NAME} PUBLIC ${WX_LIBS})
+
+	pkg_check_modules(GTK REQUIRED gtk+-3.0)
+	target_include_directories(${LIB_NAME} PUBLIC ${GTK3_INCLUDE_DIRS})
+    target_link_libraries(${LIB_NAME} PUBLIC ${GTK3_LIBRARIES})
+	target_compile_options(${LIB_NAME} PUBLIC ${GTK_CFLAGS_OTHER})
+	# target_link_libraries(${LIB_NAME} PUBLIC PkgConfig::GTK)
 endif()
 
 add_executable(${EX_NAME} main.cpp)
@@ -103,4 +119,7 @@ if(BUILD_SHARED_LIBS)
 		COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${LIB_NAME}> ${CMAKE_BINARY_DIR}/bin/Debug)
 	add_custom_command(TARGET ${EX_NAME} POST_BUILD
 		COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${LIB_NAME}> ${CMAKE_BINARY_DIR}/bin/Release)
+endif()
+
+if(UNIX)
 endif()
