@@ -15,7 +15,7 @@ MainFrame::MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, con
 	m_bitmap1 = new wxStaticBitmap(m_usrpanel, wxID_ANY, wxNullBitmap, wxDefaultPosition, wxDefaultSize, 0);
 	m_bitmap1->SetMinSize(wxSize(500, 500));
 
-	susr_box->Add(m_bitmap1, 0, wxALIGN_CENTER_HORIZONTAL | wxALL | wxEXPAND, 5);
+	susr_box->Add(m_bitmap1, 8, wxALIGN_CENTER_HORIZONTAL | wxALL, 5);
 
 	wxBoxSizer* input_bar;
 	input_bar = new wxBoxSizer(wxHORIZONTAL);
@@ -23,20 +23,20 @@ MainFrame::MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, con
 	m_txtctrl = new wxTextCtrl(m_usrpanel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
 	m_txtctrl->SetMinSize(wxSize(450, 50));
 
-	input_bar->Add(m_txtctrl, 0, wxALIGN_BOTTOM | wxALL, 5);
+	input_bar->Add(m_txtctrl, 6, wxEXPAND | wxALL, 5);
 
 	m_sendbtn = new wxButton(m_usrpanel, wxID_ANY, _("Send"), wxDefaultPosition, wxDefaultSize, 0);
 	m_sendbtn->SetMinSize(wxSize(75, -1));
 
-	input_bar->Add(m_sendbtn, 0, wxALIGN_CENTER | wxALL, 5);
+	input_bar->Add(m_sendbtn, 1, wxALIGN_CENTER | wxALL, 5);
 
-	susr_box->Add(input_bar, 1, wxALIGN_BOTTOM, 5);
+	susr_box->Add(input_bar, 1, wxEXPAND, 5);
 
 
-	m_usrpanel->SetSizer(susr_box);
+	m_usrpanel->SetSizerAndFit(susr_box);
 	m_usrpanel->Layout();
-	susr_box->Fit(m_usrpanel);
-	bSizer1->Add(m_usrpanel, 1, wxEXPAND | wxALL, 5);
+	//susr_box->Fit(m_usrpanel);
+	bSizer1->Add(m_usrpanel, 3, wxEXPAND | wxALL, 5);
 
 	m_panel2 = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
 	m_panel2->SetMinSize(wxSize(250, 550));
@@ -48,16 +48,16 @@ MainFrame::MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, con
 		wxTE_MULTILINE | wxTE_READONLY | wxTE_WORDWRAP);
 	m_chatbox->SetMinSize(wxSize(250, 550));
 
-	sbSizer2->Add(m_chatbox, 0, wxALL, 5);
+	sbSizer2->Add(m_chatbox, 1, wxALL | wxEXPAND, 5);
 
 
-	m_panel2->SetSizer(sbSizer2);
+	m_panel2->SetSizerAndFit(sbSizer2);
 	m_panel2->Layout();
-	sbSizer2->Fit(m_panel2);
-	bSizer1->Add(m_panel2, 1, wxEXPAND | wxALL, 5);
+	//sbSizer2->Fit(m_panel2);
+	bSizer1->Add(m_panel2, 2, wxEXPAND | wxALL, 5);
 
 
-	this->SetSizer(bSizer1);
+	this->SetSizerAndFit(bSizer1);
 	this->Layout();
 
 	this->Centre(wxBOTH);
@@ -112,10 +112,9 @@ bool Application::OnInit() {
 	firstc.start_recv();
 
 	Interface* _gui = new Interface(nullptr, wxID_ANY, "MHConnect");
+	_gui->linkClient(firstc);
 	_gui->Show(true);
 
-	_gui->m_client = &firstc;
-	firstc.m_gui = _gui;
 
 #ifdef _WIN32
 	WSACleanup();

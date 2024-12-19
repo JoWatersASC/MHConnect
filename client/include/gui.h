@@ -53,19 +53,25 @@ public:
 };
 
 
-class Interface : public MainFrame {
+class Interface : public MainFrame, public osf::Client::listener {
 public:
 	Interface(wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = "MHConnect",
 		const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 800,600 ), 
 		long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL|wxMODERN );
 
-	
-	osf::Client* m_client;
+	void linkClient(osf::Client& _client) {
+		m_client = &_client;
+		m_client->addListener(this);
+	}
+
+	void onNotify(const packet& _data) {
+		std::string msg = "[MSG] " + std::string(_data.data);
+		add_text(msg);
+	}
 	void add_text(std::string&);
 	
 private:
-	
-
+	osf::Client* m_client;
 	virtual void submit_msg(wxCommandEvent& event);
 	
 };
