@@ -2,6 +2,7 @@
 .vs/
 .vscode/
 out/
+gui/
 
 # not this
 !.gitignore
