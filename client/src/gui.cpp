@@ -15,7 +15,7 @@ MainFrame::MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, con
 	m_bitmap1 = new wxStaticBitmap(m_usrpanel, wxID_ANY, wxNullBitmap, wxDefaultPosition, wxDefaultSize, 0);
 	m_bitmap1->SetMinSize(wxSize(500, 500));
 
-	susr_box->Add(m_bitmap1, 0, wxALL, 5);
+	susr_box->Add(m_bitmap1, 0, wxALIGN_CENTER_HORIZONTAL | wxALL | wxEXPAND, 5);
 
 	wxBoxSizer* input_bar;
 	input_bar = new wxBoxSizer(wxHORIZONTAL);
@@ -23,15 +23,14 @@ MainFrame::MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, con
 	m_txtctrl = new wxTextCtrl(m_usrpanel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PROCESS_ENTER);
 	m_txtctrl->SetMinSize(wxSize(450, 50));
 
-	input_bar->Add(m_txtctrl, 0, wxALL, 5);
+	input_bar->Add(m_txtctrl, 0, wxALIGN_BOTTOM | wxALL, 5);
 
 	m_sendbtn = new wxButton(m_usrpanel, wxID_ANY, _("Send"), wxDefaultPosition, wxDefaultSize, 0);
 	m_sendbtn->SetMinSize(wxSize(75, -1));
 
-	input_bar->Add(m_sendbtn, 0, wxALL, 5);
+	input_bar->Add(m_sendbtn, 0, wxALIGN_CENTER | wxALL, 5);
 
-
-	susr_box->Add(input_bar, 1, wxEXPAND, 5);
+	susr_box->Add(input_bar, 1, wxALIGN_BOTTOM, 5);
 
 
 	m_usrpanel->SetSizer(susr_box);
@@ -39,13 +38,13 @@ MainFrame::MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, con
 	susr_box->Fit(m_usrpanel);
 	bSizer1->Add(m_usrpanel, 1, wxEXPAND | wxALL, 5);
 
-	m_panel2 = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
+	m_panel2 = new wxPanel(this, wxID_ANY | wxEXPAND, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
 	m_panel2->SetMinSize(wxSize(250, 550));
 
 	wxStaticBoxSizer* sbSizer2;
 	sbSizer2 = new wxStaticBoxSizer(new wxStaticBox(m_panel2, wxID_ANY, _("Chat List")), wxVERTICAL);
 
-	m_chatbox = new wxTextCtrl(sbSizer2->GetStaticBox(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize,
+	m_chatbox = new wxTextCtrl(sbSizer2->GetStaticBox(), wxID_ANY | wxEXPAND, wxEmptyString, wxDefaultPosition, wxDefaultSize,
 		wxTE_MULTILINE | wxTE_READONLY | wxTE_WORDWRAP);
 	m_chatbox->SetMinSize(wxSize(250, 550));
 
@@ -106,9 +105,10 @@ bool Application::OnInit() {
 
 	osf::Client firstc(cl_fd, serv_addr, 6);
 
-	if (!firstc.start_connect())
-		return 1;
+	//if (!firstc.start_connect());
+		//return 1;
 
+	firstc.start_connect();
 	firstc.start_recv();
 
 	Interface* _gui = new Interface(nullptr, wxID_ANY, "MHConnect");
