@@ -1,5 +1,5 @@
 #include "../include/client.h"
-#include "gui.h"
+//#include "gui.h"
 
 using namespace osf;
 
@@ -44,7 +44,6 @@ void Client::start_recv() {
 			msg_queue.enqueue(out_pckt);
 
             std::string _msg(msg_queue.pop_front().data);
-			m_gui->add_text(_msg);
         }
         recv_tp.add([this]() { start_recv(); });
     } else {
