@@ -3,7 +3,7 @@ set(EX_NAME "MHConnectClient")
 
 # Client side application
 
-set(CMAKE_PREFIX_PATH "C:/sdk/lib/rtaudio")
+set(CMAKE_PREFIX_PATH "/path/to/rtaudio")
 
 set(INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
@@ -23,8 +23,6 @@ set_target_properties(${LIB_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BI
 
 
 target_include_directories(${LIB_NAME} PUBLIC ${INCLUDE_DIR} "${CMAKE_SOURCE_DIR}/common" INTERFACE ${INCLUDE_DIR} "${CMAKE_SOURCE_DIR}/common")
-
-# find_package(wxWidgets REQUIRED)
 
 if(UNIX)
     find_package(PkgConfig REQUIRED)
@@ -62,8 +60,8 @@ if(WIN32)
                 target_link_libraries(${LIB_NAME} PUBLIC ${CMAKE_BINARY_DIR}/install/lib/rtaudio/Release)
 
         else()
-                set(RTAUDIO_PATH "C:/sdk/lib/rtaudio/Release")
-                set(RTAUDIO_INSTALLATION_PATH "C:/sdk/repos/rtaudio")
+                set(RTAUDIO_PATH "path/to/rtaudio/Release")
+                set(RTAUDIO_INSTALLATION_PATH "path/to/local/rtaudio/repository")
 
                 target_include_directories(${LIB_NAME} PUBLIC ${RTAUDIO_INSTALLATION_PATH})
                 target_link_directories(${LIB_NAME} PUBLIC ${RTAUDIO_PATH})
@@ -88,7 +86,6 @@ if(WIN32)
 		set(WX_DLIBS wxbase32ud wxbase32ud_net wxmsw32ud_core wxbase32ud_xml wxmsw32ud_adv wxmsw32ud_aui wxmsw32ud_media wxmsw32ud_gl wxmsw32ud_qa wxmsw32ud_ribbon wxmsw32ud_richtext wxmsw32ud_stc)
 		set(WX_RLIBS wxbase32u wxbase32u_net wxmsw32u_core wxbase32u_xml wxmsw32u_adv wxmsw32u_aui wxmsw32u_media wxmsw32u_gl wxmsw32u_qa wxmsw32u_ribbon wxmsw32u_richtext wxmsw32u_stc)
 		
-		# set(SELECTED_WX_LIBS ${WX_DLIBS})
 		target_link_libraries(${LIB_NAME} PUBLIC ${WX_DLIBS} INTERFACE ${WX_DLIBS})
 
 elseif(UNIX)
@@ -106,7 +103,6 @@ elseif(UNIX)
 	target_include_directories(${LIB_NAME} PUBLIC ${GTK3_INCLUDE_DIRS})
     target_link_libraries(${LIB_NAME} PUBLIC ${GTK3_LIBRARIES})
 	target_compile_options(${LIB_NAME} PUBLIC ${GTK_CFLAGS_OTHER})
-	# target_link_libraries(${LIB_NAME} PUBLIC PkgConfig::GTK)
 endif()
 
 add_executable(${EX_NAME} main.cpp)
