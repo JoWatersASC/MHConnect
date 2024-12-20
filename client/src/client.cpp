@@ -1,6 +1,4 @@
 #include "../include/client.h"
-//#include "gui.h"
-
 using namespace osf;
 
 bool Client::start_connect() {
@@ -43,7 +41,7 @@ void Client::start_recv() {
             std::cout << "Received: " << out_pckt << std::endl;
 			msg_queue.enqueue(out_pckt);
 
-            std::string _msg(msg_queue.pop_front().data);
+			notify();
         }
         recv_tp.add([this]() { start_recv(); });
     } else {
