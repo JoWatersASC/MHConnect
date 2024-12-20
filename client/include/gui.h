@@ -22,6 +22,7 @@
 #include <wx/panel.h>
 #include <wx/statbox.h>
 #include <wx/frame.h>
+#include <wx/gbsizer.h>
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -58,6 +59,11 @@ public:
 	Interface(wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = "MHConnect",
 		const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 800,600 ), 
 		long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL|wxMODERN );
+		
+	//To be constructed with a client
+	Interface(wxWindow* parent, osf::Client&, wxWindowID id = wxID_ANY, const wxString& title = "MHConnect",
+		const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 800,600 ), 
+		long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL|wxMODERN);
 
 	void linkClient(osf::Client& _client) {
 		m_client = &_client;
@@ -74,6 +80,31 @@ private:
 	osf::Client* m_client;
 	virtual void submit_msg(wxCommandEvent& event);
 	
+};
+
+class StartMenuFrame : public wxFrame
+{
+	private:
+		Interface* getUserScreen();
+		
+	protected:
+		wxTextCtrl* ip_input;
+		wxTextCtrl* port_input;
+		wxStdDialogButtonSizer* accept_btns;
+		wxButton* accept_btnsOK;
+		wxButton* accept_btnsCancel;
+
+		// Virtual event handlers, override them in your derived class
+		virtual void clearFields( wxCommandEvent& event );
+		virtual void connectServer( wxCommandEvent& event );
+
+
+	public:
+
+		StartMenuFrame( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 500,300 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
+
+		~StartMenuFrame();
+
 };
 
 class Application : public wxApp{
