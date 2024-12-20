@@ -74,7 +74,7 @@ elseif(WIN32)
     endif()
 endif()
 
-add_executable(${EX_NAME} main.cpp "${INCLUDE_DIR}/gui.h" src/gui.cpp)
+add_executable(${EX_NAME} main.cpp "${INCLUDE_DIR}/gui.h" src/main_gui.cpp src/start_gui.cpp)
 target_link_libraries(${EX_NAME} PRIVATE ${LIB_NAME})
 
 if(WIN32)
