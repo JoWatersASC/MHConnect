@@ -35,7 +35,7 @@ public:
     void start_audio_out() { m_outaudio.startAudioStream(); }
 	
 	const packet poll_msgs() { return msg_queue.pop_front(); }
-	const bool pollable() { return msg_queue.empty(); }
+	const bool pollable() { return !msg_queue.empty(); }
     
     void close();
 
