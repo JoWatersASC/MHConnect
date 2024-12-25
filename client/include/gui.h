@@ -34,6 +34,8 @@ class MainFrame : public wxFrame
 private:
 
 protected:
+	wxPanel* cvid_panel;
+
 	wxPanel* m_usrpanel;
 	wxStaticBitmap* m_bitmap1;
 	wxTextCtrl* m_txtctrl;

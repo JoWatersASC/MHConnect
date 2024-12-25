@@ -11,11 +11,27 @@ MainFrame::MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, con
 	m_usrpanel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
 	wxBoxSizer* susr_box;
 	susr_box = new wxBoxSizer(wxVERTICAL);
+	
+	
+	
+	cvid_panel = new wxPanel( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	cvid_panel->SetMinSize(wxSize(500, 500));
+	wxGridSizer* gSizer1;
+	gSizer1 = new wxGridSizer( 0, 0, 0, 0 );
 
-	m_bitmap1 = new wxStaticBitmap(m_usrpanel, wxID_ANY, wxNullBitmap, wxDefaultPosition, wxDefaultSize, 0);
-	m_bitmap1->SetMinSize(wxSize(500, 500));
+	m_bitmap1 = new wxStaticBitmap( cvid_panel, wxID_ANY, wxNullBitmap, wxDefaultPosition, wxDefaultSize, 0 );
+	
+	gSizer1->Add( m_bitmap1, 0, wxALL, 5 );
 
-	susr_box->Add(m_bitmap1, 8, wxALIGN_CENTER_HORIZONTAL | wxALL, 5);
+
+	cvid_panel->SetSizer( gSizer1 );
+	cvid_panel->Layout();
+	gSizer1->Fit( cvid_panel );
+	susr_box->Add( cvid_panel, 8, wxEXPAND | wxALL, 5 );
+	
+
+	// m_bitmap1 = new wxStaticBitmap(m_usrpanel, wxID_ANY, wxNullBitmap, wxDefaultPosition, wxDefaultSize, 0);
+	// susr_box->Add(m_bitmap1, 8, wxALIGN_CENTER_HORIZONTAL | wxALL, 5);
 
 	wxBoxSizer* input_bar;
 	input_bar = new wxBoxSizer(wxHORIZONTAL);
@@ -35,7 +51,7 @@ MainFrame::MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, con
 
 	m_usrpanel->SetSizerAndFit(susr_box);
 	m_usrpanel->Layout();
-	//susr_box->Fit(m_usrpanel);
+	
 	bSizer1->Add(m_usrpanel, 3, wxEXPAND | wxALL, 5);
 
 	m_panel2 = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL);
@@ -103,23 +119,6 @@ bool Application::OnInit() {
 	if (winsock_initialize())
 		return 1;
 #endif
-
-	// int cl_fd = socket(AF_INET, SOCK_STREAM, 0);
-	// sockaddr_in serv_addr;
-
-	// serv_addr = osf::create_address("127.0.0.1", 16000);
-
-	// osf::Client firstc(cl_fd, serv_addr, 6);
-
-	//if (!firstc.start_connect());
-		//return 1;
-
-	// firstc.start_connect();
-	// firstc.start_recv();
-
-	// Interface* _gui = new Interface(nullptr, wxID_ANY, "MHConnect");
-	// _gui->linkClient(firstc);
-	// _gui->Show(true);
 	
 	StartMenuFrame* start_menu = new StartMenuFrame(nullptr, wxID_ANY, "MHConnect");
 	start_menu->Show(true);
