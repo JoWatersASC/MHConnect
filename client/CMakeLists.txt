@@ -74,12 +74,19 @@ elseif(WIN32)
     endif()
 endif()
 
-add_executable(${EX_NAME} main.cpp "${INCLUDE_DIR}/gui.h" src/main_gui.cpp src/start_gui.cpp)
+add_executable(${EX_NAME} main.cpp 
+	"${INCLUDE_DIR}/gui.h" "${INCLUDE_DIR}/video.h"
+	src/main_gui.cpp src/start_gui.cpp src/video.cpp)
+	
 target_link_libraries(${EX_NAME} PRIVATE ${LIB_NAME})
+
+set(CMAKE_PREFIX_PATH "/tools/opencv/build/x64/vc16/bin")
+find_package(OpenCV REQUIRED)
+target_link_libraries(${EX_NAME} PRIVATE ${OpenCV_LIBS})
 
 if(WIN32)
     add_definitions(-D_UNICODE -DUNICODE)
-    set(wxWidgets_USE_STATIC OFF)
+    set(wxWidgets_USE_STATIC ON)
 
     if(wxWidgets_USE_STATIC)
         target_link_directories(${EX_NAME} PRIVATE "$ENV{WXWIN}/lib/vc_x64_lib")

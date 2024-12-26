@@ -1,4 +1,5 @@
 #include "gui.h"
+#include "video.h"
 
 MainFrame::MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style) : wxFrame(parent, id, title, pos, size, style)
 {
@@ -19,15 +20,18 @@ MainFrame::MainFrame(wxWindow* parent, wxWindowID id, const wxString& title, con
 	wxGridSizer* gSizer1;
 	gSizer1 = new wxGridSizer( 0, 0, 0, 0 );
 
-	m_bitmap1 = new wxStaticBitmap( cvid_panel, wxID_ANY, wxNullBitmap, wxDefaultPosition, wxDefaultSize, 0 );
+	/*m_bitmap1 = new wxStaticBitmap( cvid_panel, wxID_ANY, wxNullBitmap, wxDefaultPosition, wxDefaultSize, 0 );
 	
-	gSizer1->Add( m_bitmap1, 0, wxALL, 5 );
+	gSizer1->Add( m_bitmap1, 0, wxALL, 5 );*/
 
+	osf::VidPanel* vp = new osf::VidPanel(cvid_panel, 0);
 
 	cvid_panel->SetSizer( gSizer1 );
 	cvid_panel->Layout();
 	gSizer1->Fit( cvid_panel );
 	susr_box->Add( cvid_panel, 8, wxEXPAND | wxALL, 5 );
+	
+	gSizer1->Add(vp, 0, wxALL | wxEXPAND, 5);
 	
 
 	// m_bitmap1 = new wxStaticBitmap(m_usrpanel, wxID_ANY, wxNullBitmap, wxDefaultPosition, wxDefaultSize, 0);
