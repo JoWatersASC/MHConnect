@@ -1,4 +1,5 @@
 set(LIB_NAME "MHConnectClientCore")
+set(H_EX_NAME "MHConnectClient_Headless")
 set(EX_NAME "MHConnectClient")
 
 set(INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
@@ -38,6 +39,16 @@ target_include_directories(${LIB_NAME}
 )
 
 target_link_libraries(${LIB_NAME} INTERFACE commonlib)
+
+set(HEADLESS_BUILD OFF)
+if(HEADLESS_BUILD)
+    add_executable(${EX_NAME} main_h.cpp)
+    target_link_libraries(${EX_NAME} PRIVATE ${LIB_NAME})
+
+    return()
+endif()
+
+
 
 if(UNIX)
     find_package(PkgConfig REQUIRED)
@@ -80,13 +91,28 @@ add_executable(${EX_NAME} main.cpp
 	
 target_link_libraries(${EX_NAME} PRIVATE ${LIB_NAME})
 
-set(CMAKE_PREFIX_PATH "/tools/opencv/build/x64/vc16/bin")
+set(OPENCV_DIR $ENV{OpenCV_DIR})
+# message(STATUS "Environment variable: $ENV{OpenCV_DIR}")
 find_package(OpenCV REQUIRED)
 target_link_libraries(${EX_NAME} PRIVATE ${OpenCV_LIBS})
 
 if(WIN32)
     add_definitions(-D_UNICODE -DUNICODE)
-    set(wxWidgets_USE_STATIC ON)
+	add_definitions(-DWXUSINGDLL)
+	
+	find_package(wxWidgets REQUIRED)
+	target_include_directories(${EX_NAME} PRIVATE ${wxWidgets_INCLUDE_DIRS})
+    target_link_directories(${EX_NAME} PRIVATE ${wxWidgets_INCLUDE_DIRS})
+	target_link_libraries(${EX_NAME} PRIVATE ${wxWidgets_LIBRARIES})
+	
+	set(CMAKE_INSTALL_RPATH "$ENV{WXWIN}/lib/vc_x64_dll")
+    message(STATUS ${CMAKE_INSTALL_RPATH})
+
+endif()
+
+if(False)
+    add_definitions(-D_UNICODE -DUNICODE)
+    set(wxWidgets_USE_STATIC OFF)
 
     if(wxWidgets_USE_STATIC)
         target_link_directories(${EX_NAME} PRIVATE "$ENV{WXWIN}/lib/vc_x64_lib")
@@ -96,17 +122,17 @@ if(WIN32)
     endif()
 
     target_include_directories(${EX_NAME} PRIVATE
-        "$ENV{WXWIN}/include"
-        "$ENV{WXWIN}/include/msvc"
+        "$ENV{WXWIN}/include/"
+        # "$ENV{WXWIN}/include/msvc"
     )
 
-        # For release builds
-        # set(WX_LIBS
-        #       wxbase32u wxbase32u_net wxmsw32u_core
-        #       wxbase32u_xml wxmsw32u_adv wxmsw32u_aui
-        #       wxmsw32u_media wxmsw32u_gl wxmsw32u_qa
-        #       wxmsw32u_ribbon wxmsw32u_richtext wxmsw32u_stc
-        #)
+	# For release builds
+	# set(WX_LIBS
+	#       wxbase32u wxbase32u_net wxmsw32u_core
+	#       wxbase32u_xml wxmsw32u_adv wxmsw32u_aui
+	#       wxmsw32u_media wxmsw32u_gl wxmsw32u_qa
+	#       wxmsw32u_ribbon wxmsw32u_richtext wxmsw32u_stc
+	#)
     set(WX_LIBS
         wxbase32ud wxbase32ud_net wxmsw32ud_core
         wxbase32ud_xml wxmsw32ud_adv wxmsw32ud_aui
