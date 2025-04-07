@@ -5,6 +5,15 @@ set(EX_NAME "MHConnectClient")
 set(INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
 set(CMAKE_PREFIX_PATH "$ENV{SDK}/lib/rtaudio")
 
+set(SOURCE_FILES_H
+    src/client_h.cpp
+)
+
+set(HEADER_FILES_H
+    "${INCLUDE_DIR}/client_h.h"
+    "${INCLUDE_DIR}/core.h"
+)
+
 set(SOURCE_FILES
     src/client.cpp
     src/audio.cpp
@@ -18,11 +27,20 @@ set(HEADER_FILES
 
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
 set(BUILD_SHARED_LIBS ON)
+set(HEADLESS_BUILD OFF)
 
 if(BUILD_SHARED_LIBS)
-    add_library(${LIB_NAME} SHARED ${SOURCE_FILES} ${HEADER_FILES})
+    if(NOT HEADLESS_BUILD)
+        add_library(${LIB_NAME} SHARED ${SOURCE_FILES} ${HEADER_FILES})
+    else()
+        add_library(${LIB_NAME} SHARED ${SOURCE_FILES_H} ${HEADER_FILES_H})  
+    endif()
 else()
-    add_library(${LIB_NAME} STATIC ${SOURCE_FILES} ${HEADER_FILES})
+    if(NOT HEADLESS_BUILD)
+        add_library(${LIB_NAME} STATIC ${SOURCE_FILES} ${HEADER_FILES})
+    else()
+        add_library(${LIB_NAME} STATIC ${SOURCE_FILES_H} ${HEADER_FILES_H})   
+    endif() 
 endif()
 
 set_target_properties(${LIB_NAME} PROPERTIES
@@ -40,15 +58,11 @@ target_include_directories(${LIB_NAME}
 
 target_link_libraries(${LIB_NAME} INTERFACE commonlib)
 
-set(HEADLESS_BUILD OFF)
 if(HEADLESS_BUILD)
     add_executable(${EX_NAME} main_h.cpp)
     target_link_libraries(${EX_NAME} PRIVATE ${LIB_NAME})
 
-    return()
-endif()
-
-
+else()
 
 if(UNIX)
     find_package(PkgConfig REQUIRED)
@@ -85,8 +99,9 @@ elseif(WIN32)
     endif()
 endif()
 
+
 add_executable(${EX_NAME} main.cpp 
-	"${INCLUDE_DIR}/gui.h" "${INCLUDE_DIR}/video.h"
+	"${INCLUDE_DIR}/gui.h" "${INCLUDE_DIR}/video.h" src/audio.cpp
 	src/main_gui.cpp src/start_gui.cpp src/video.cpp)
 	
 target_link_libraries(${EX_NAME} PRIVATE ${LIB_NAME})
@@ -165,6 +180,8 @@ elseif(UNIX)
     target_include_directories(${EX_NAME} PRIVATE ${GTK3_INCLUDE_DIRS})
     target_link_libraries(${EX_NAME} PRIVATE ${GTK3_LIBRARIES})
     target_compile_options(${EX_NAME} PRIVATE ${GTK3_CFLAGS_OTHER})
+endif()
+
 endif()
 
 set_target_properties(${EX_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
