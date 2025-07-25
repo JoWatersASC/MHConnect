@@ -2,193 +2,176 @@ set(LIB_NAME "MHConnectClientCore")
 set(H_EX_NAME "MHConnectClient_Headless")
 set(EX_NAME "MHConnectClient")
 
-set(INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
-set(CMAKE_PREFIX_PATH "$ENV{SDK}/lib/rtaudio")
 
-set(SOURCE_FILES_H
+option(BUILD_SHARED_LIBS OFF)
+option(HEADLESS_BUILD ON)
+if(WIN32)
+    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+endif()
+
+set(INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
+
+set(SOURCE_FILES)
+set(HEADER_FILES)
+
+
+
+if(HEADLESS_BUILD)
+message(STATUS "HEADLESS BUILD BUILT")
+
+set(SOURCE_FILES
     src/client_h.cpp
 )
-
-set(HEADER_FILES_H
+set(HEADER_FILES
     "${INCLUDE_DIR}/client_h.h"
     "${INCLUDE_DIR}/core.h"
 )
+
+if(BUILD_SHARED_LIBS)
+    add_library(${LIB_NAME} SHARED ${SOURCE_FILES} ${HEADER_FILES}) 
+else()
+    add_library(${LIB_NAME} STATIC ${SOURCE_FILES} ${HEADER_FILES})
+endif() # BUILD_SHARED_LIBS
+
+add_executable(${EX_NAME} main_h.cpp)
+# return()
+else() # HEADLESS_BUILD
+message(STATUS "GUI BUILD BUILT")
 
 set(SOURCE_FILES
     src/client.cpp
     src/audio.cpp
 )
-
 set(HEADER_FILES
     "${INCLUDE_DIR}/client.h"
     "${INCLUDE_DIR}/audio.h"
     "${INCLUDE_DIR}/core.h"
 )
 
-set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
-set(BUILD_SHARED_LIBS ON)
-set(HEADLESS_BUILD OFF)
-
-if(BUILD_SHARED_LIBS)
-    if(NOT HEADLESS_BUILD)
-        add_library(${LIB_NAME} SHARED ${SOURCE_FILES} ${HEADER_FILES})
-    else()
-        add_library(${LIB_NAME} SHARED ${SOURCE_FILES_H} ${HEADER_FILES_H})  
+include(FetchContent)
+#-------------------------
+# Fetch RtAudio Content
+#-------------------------
+find_package(RtAudio)
+if(RtAudio_FOUND)
+	message(STATUS "RtAudio found in system")
+	
+	if(NOT TARGET rtaudio)
+        add_library(rtaudio INTERFACE IMPORTED)
+        target_include_directories(rtaudio INTERFACE ${RtAudio_INCLUDE_DIRS})
+        target_link_libraries(rtaudio INTERFACE ${RtAudio_LIBRARIES})
+        message(STATUS "Created wrapper target for legacy RtAudio variables.")
     endif()
 else()
-    if(NOT HEADLESS_BUILD)
-        add_library(${LIB_NAME} STATIC ${SOURCE_FILES} ${HEADER_FILES})
-    else()
-        add_library(${LIB_NAME} STATIC ${SOURCE_FILES_H} ${HEADER_FILES_H})   
-    endif() 
+	message(STATUS "RtAudio NOT found in system, fetching content")
+	FetchContent_Declare(
+		RTAudio
+		GIT_REPOSITORY https://github.com/thestk/rtaudio.git
+		GIT_TAG        6.0.0
+	) 
+	FetchContent_MakeAvailable(RTAudio)
+endif()# RtAudio_FOUND
+
+if (TARGET rtaudio)
+    message(STATUS "RtAudio found/fetched and target 'rtaudio' is available.")
+else()
+    message(FATAL_ERROR "RtAudio target 'rtaudio' not found after find/fetch. Check RtAudio's CMake configuration.")
 endif()
+
+#-------------------------
+# Fetch OpenCV Content
+#-------------------------
+set(OPENCV_REQUIRED_COMPONENTS imgproc videoio)
+FetchContent_Declare(
+    OpenCV
+    GIT_REPOSITORY https://github.com/opencv/opencv.git
+    GIT_TAG        4.9.0
+
+    FIND_PACKAGE_ARGS
+        CONFIG QUIET COMPONENTS ${OPENCV_REQUIRED_COMPONENTS}
+)
+set(BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(BUILD_PERF_TESTS OFF CACHE BOOL "" FORCE)
+set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(BUILD_opencv_apps OFF CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(OpenCV)
+
+set(OPENCV_TARGETS "")
+foreach(comp ${OPENCV_REQUIRED_COMPONENTS})
+    list(APPEND OPENCV_TARGETS opencv_${comp})
+endforeach()
+
+if(OpenCV_FOUND)
+    message(STATUS "Found OpenCV: ${OpenCV_VERSION}")
+endif()
+
+#-------------------------
+# Fetch wxWidgets Content
+#-------------------------
+set(wxWidgets_COMPONENTS core base)
+find_package(wxWidgets QUIET COMPONENTS ${wxWidgets_COMPONENTS})
+
+if(wxWidgets_FOUND)
+    message(STATUS "Found system installed wxWidgets: ${wxWidgets_VERSION}")
+	
+	if(NOT TARGET wx::wxWidgets)
+        add_library(wx::wxWidgets INTERFACE IMPORTED)
+        target_include_directories(wx::wxWidgets INTERFACE ${wxWidgets_INCLUDE_DIRS})
+        target_link_libraries(wx::wxWidgets INTERFACE ${wxWidgets_LIBRARIES})
+        target_compile_definitions(wx::wxWidgets INTERFACE ${wxWidgets_DEFINITIONS})
+        if(wxWidgets_CXX_FLAGS)
+            target_compile_options(wx::wxWidgets INTERFACE ${wxWidgets_CXX_FLAGS})
+        endif()
+        message(STATUS "Created wrapper target for system wxWidgets.")
+    endif()
+else()
+    message(STATUS "System installed wxWidgets NOT found, fetching content")
+    
+    FetchContent_Declare(
+        wxwidgets_proj
+        GIT_REPOSITORY https://github.com/wxWidgets/wxWidgets.git
+        GIT_TAG        v3.2.5
+    )
+    set(wxBUILD_SHARED OFF CACHE BOOL "" FORCE)
+    set(wxBUILD_SAMPLES OFF CACHE BOOL "" FORCE)
+    set(wxBUILD_TESTS OFF CACHE BOOL "" FORCE)
+    set(wxBUILD_DEMOS OFF CACHE BOOL "" FORCE)
+    set(wxUSE_GUI ON CACHE BOOL "" FORCE)
+    FetchContent_MakeAvailable(wxwidgets_proj)
+
+	if(NOT TARGET wx::wxWidgets)
+		add_library(wx::wxWidgets INTERFACE IMPORTED)
+		target_link_libraries(wx::wxWidgets INTERFACE wx::core wx::base)
+		message(STATUS "Created wrapper target for legacy wxWidgets find module.")
+	endif()
+endif() # wxWidgets_FOUND
+
+
+if(BUILD_SHARED_LIBS)
+    add_library(${LIB_NAME} SHARED ${SOURCE_FILES} ${HEADER_FILES})
+else()
+    add_library(${LIB_NAME} STATIC ${SOURCE_FILES} ${HEADER_FILES})
+endif() # BUILD_SHARED_LIBS
+
+add_executable(${EX_NAME} main.cpp
+    src/main_gui.cpp src/start_gui.cpp src/video.cpp
+	"${INCLUDE_DIR}/gui.h" "${INCLUDE_DIR}/video.h")
+
+target_link_libraries(${LIB_NAME} PUBLIC rtaudio)
+target_link_libraries(${EX_NAME} PRIVATE ${OPENCV_TARGETS} wx::wxWidgets)
+
+get_target_property(WXWIDGETS_INCLUDES wx::wxWidgets INTERFACE_INCLUDE_DIRECTORIES)
+message(STATUS "DEBUG: wxWidgets include directories are: ${WXWIDGETS_INCLUDES}")
+endif() # HEADLESS_BUILD
 
 set_target_properties(${LIB_NAME} PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/libs
 )
 
-target_include_directories(${LIB_NAME}
-    PUBLIC
-        ${INCLUDE_DIR}
-        "${CMAKE_SOURCE_DIR}/common"
-    INTERFACE
-        ${INCLUDE_DIR}
-        "${CMAKE_SOURCE_DIR}/common"
+target_include_directories(${LIB_NAME} PUBLIC
+    ${INCLUDE_DIR}
+    "${CMAKE_SOURCE_DIR}/common"
 )
 
 target_link_libraries(${LIB_NAME} INTERFACE commonlib)
-
-if(HEADLESS_BUILD)
-    add_executable(${EX_NAME} main_h.cpp)
-    target_link_libraries(${EX_NAME} PRIVATE ${LIB_NAME})
-
-else()
-
-if(UNIX)
-    find_package(PkgConfig REQUIRED)
-    pkg_check_modules(RTAUDIO REQUIRED rtaudio)
-    target_link_libraries(${LIB_NAME} PUBLIC ${RTAUDIO_LIBRARIES})
-    target_include_directories(${LIB_NAME} PUBLIC ${RTAUDIO_INCLUDE_DIRS})
-
-elseif(WIN32)
-    option(DOWNLOAD_RTAUDIO "Would you like to download RT Audio? (ON for Yes, OFF for No)" OFF)
-    message(STATUS "DOWNLOAD_RTAUDIO is set to ${DOWNLOAD_RTAUDIO}")
-
-    if(DOWNLOAD_RTAUDIO)
-        include(ExternalProject)
-        ExternalProject_Add(
-            rt_audio
-            GIT_REPOSITORY https://github.com/thestk/rtaudio.git
-            GIT_TAG        master
-            PREFIX         ${CMAKE_BINARY_DIR}/externals/MyLibrary
-            INSTALL_DIR    ${CMAKE_BINARY_DIR}/install
-            CMAKE_ARGS     -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
-            BUILD_COMMAND   ${CMAKE_COMMAND} --build <BINARY_DIR>
-            INSTALL_COMMAND ${CMAKE_COMMAND} --build <BINARY_DIR> --target install
-        )
-
-        add_dependencies(${LIB_NAME} rt_audio)
-        target_include_directories(${LIB_NAME} PUBLIC ${CMAKE_BINARY_DIR}/install/include)
-        target_link_libraries(${LIB_NAME} PUBLIC ${CMAKE_BINARY_DIR}/install/lib/rtaudio/Release)
-    else()
-        set(RTAUDIO_PATH "$ENV{SDK}/lib/rtaudio/Release")
-        set(RTAUDIO_INSTALLATION_PATH "$ENV{SDK}/vendor/rtaudio")
-        target_include_directories(${LIB_NAME} PUBLIC ${RTAUDIO_INSTALLATION_PATH})
-        target_link_directories(${LIB_NAME} PUBLIC ${RTAUDIO_PATH})
-        target_link_libraries(${LIB_NAME} PUBLIC rtaudio INTERFACE rtaudio)
-    endif()
-endif()
-
-
-add_executable(${EX_NAME} main.cpp 
-	"${INCLUDE_DIR}/gui.h" "${INCLUDE_DIR}/video.h" src/audio.cpp
-	src/main_gui.cpp src/start_gui.cpp src/video.cpp)
-	
 target_link_libraries(${EX_NAME} PRIVATE ${LIB_NAME})
-
-set(OPENCV_DIR $ENV{OpenCV_DIR})
-# message(STATUS "Environment variable: $ENV{OpenCV_DIR}")
-find_package(OpenCV REQUIRED)
-target_link_libraries(${EX_NAME} PRIVATE ${OpenCV_LIBS})
-
-if(WIN32)
-    add_definitions(-D_UNICODE -DUNICODE)
-	add_definitions(-DWXUSINGDLL)
-	
-	find_package(wxWidgets REQUIRED)
-	target_include_directories(${EX_NAME} PRIVATE ${wxWidgets_INCLUDE_DIRS})
-    target_link_directories(${EX_NAME} PRIVATE ${wxWidgets_INCLUDE_DIRS})
-	target_link_libraries(${EX_NAME} PRIVATE ${wxWidgets_LIBRARIES})
-	
-	set(CMAKE_INSTALL_RPATH "$ENV{WXWIN}/lib/vc_x64_dll")
-    message(STATUS ${CMAKE_INSTALL_RPATH})
-
-endif()
-
-if(False)
-    add_definitions(-D_UNICODE -DUNICODE)
-    set(wxWidgets_USE_STATIC OFF)
-
-    if(wxWidgets_USE_STATIC)
-        target_link_directories(${EX_NAME} PRIVATE "$ENV{WXWIN}/lib/vc_x64_lib")
-    else()
-        add_definitions(-DWXUSINGDLL)
-        target_link_directories(${EX_NAME} PRIVATE "$ENV{WXWIN}/lib/vc_x64_dll")
-    endif()
-
-    target_include_directories(${EX_NAME} PRIVATE
-        "$ENV{WXWIN}/include/"
-        # "$ENV{WXWIN}/include/msvc"
-    )
-
-	# For release builds
-	# set(WX_LIBS
-	#       wxbase32u wxbase32u_net wxmsw32u_core
-	#       wxbase32u_xml wxmsw32u_adv wxmsw32u_aui
-	#       wxmsw32u_media wxmsw32u_gl wxmsw32u_qa
-	#       wxmsw32u_ribbon wxmsw32u_richtext wxmsw32u_stc
-	#)
-    set(WX_LIBS
-        wxbase32ud wxbase32ud_net wxmsw32ud_core
-        wxbase32ud_xml wxmsw32ud_adv wxmsw32ud_aui
-        wxmsw32ud_media wxmsw32ud_gl wxmsw32ud_qa
-        wxmsw32ud_ribbon wxmsw32ud_richtext wxmsw32ud_stc
-    )
-    target_link_libraries(${EX_NAME} PRIVATE ${WX_LIBS})
-
-elseif(UNIX)
-    find_package(wxWidgets REQUIRED COMPONENTS core base)
-    include(${wxWidgets_USE_FILE})
-    execute_process(
-        COMMAND wx-config --cxxflags
-        OUTPUT_VARIABLE WX_CXXFLAGS
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
-    execute_process(
-        COMMAND wx-config --libs
-        OUTPUT_VARIABLE WX_LIBS
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
-
-    target_link_libraries(${EX_NAME} PRIVATE ${wxWidgets_LIBRARIES})
-    target_include_directories(${EX_NAME} PRIVATE ${wxWidgets_INCLUDE_DIRS})
-    target_compile_options(${EX_NAME} PRIVATE ${WX_CXXFLAGS})
-    target_link_libraries(${EX_NAME} PRIVATE ${WX_LIBS})
-
-    find_package(PkgConfig REQUIRED)
-    pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
-    target_include_directories(${EX_NAME} PRIVATE ${GTK3_INCLUDE_DIRS})
-    target_link_libraries(${EX_NAME} PRIVATE ${GTK3_LIBRARIES})
-    target_compile_options(${EX_NAME} PRIVATE ${GTK3_CFLAGS_OTHER})
-endif()
-
-endif()
-
-set_target_properties(${EX_NAME} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-
-if(WIN32 AND BUILD_SHARED_LIBS)
-    add_custom_command(TARGET ${EX_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${LIB_NAME}> ${CMAKE_BINARY_DIR}/bin/Debug)
-    add_custom_command(TARGET ${EX_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${LIB_NAME}> ${CMAKE_BINARY_DIR}/bin/Release)
-endif()
