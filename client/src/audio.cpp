@@ -107,13 +107,13 @@ int AudioStreamer::recordCallback(void* out_buff, void* in_buff, unsigned int nu
     return 0;
 }
 
-
-
-
-
-
-
-
+;
+;
+;
+;
+;
+;
+;
 
 
 void AudioReceiver::startAudioStream() {
