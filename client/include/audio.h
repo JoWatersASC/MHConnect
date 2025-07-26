@@ -18,11 +18,11 @@
 namespace osf
 {
 
-static constexpr int SAMPLE_RATE = 44100;
-static constexpr unsigned int BUFFER_FRAMES = 256;
-static constexpr int INCHANNELS = 1;
-static constexpr int OUTCHANNELS = 2;
-static constexpr int BYTES_PER_SAMPLE = sizeof(float);
+static const int SAMPLE_RATE = 44100;
+static const unsigned int BUFFER_FRAMES = 256;
+static const int INCHANNELS = 1;
+static const int OUTCHANNELS = 2;
+static const int BYTES_PER_SAMPLE = sizeof(float);
 
 class AudioStreamer {
 public:
@@ -44,8 +44,8 @@ public:
 private:
     RtAudio m_audio;
     int m_sock_fd;
-    std::vector<char> m_audioBuff;  
-    std::atomic<bool> isCapturing = false;  
+    std::vector<char> m_audioBuff;
+    std::atomic<bool> isCapturing = false;
     
     ThreadPool& send_tp;
 

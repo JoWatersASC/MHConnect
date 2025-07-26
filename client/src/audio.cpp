@@ -20,6 +20,7 @@ void AudioStreamer::startCapture() {
     inputParams.firstChannel = 0;
 
     isCapturing = true;
+	unsigned int bufferFrames = BUFFER_FRAMES;
 
     try {
         m_audio.openStream(
@@ -27,7 +28,7 @@ void AudioStreamer::startCapture() {
             &inputParams,          // Input parameters
             RTAUDIO_FLOAT32,       // Audio format
             SAMPLE_RATE,           // Sample rate
-            (unsigned int *)&BUFFER_FRAMES,        // Buffer frames
+            &bufferFrames,        // Buffer frames
             &recordCallback,       // Callback function
             this               // Error callback
         );
@@ -35,17 +36,10 @@ void AudioStreamer::startCapture() {
         // Start audio stream
         m_audio.startStream();
     }
-    #ifdef _WIN32
     catch (RtAudioErrorType& e) {
         std::cerr << "RtAudio Error: " << e << std::endl;
         throw;
     }
-    #else
-    catch (RtAudioError& e) {
-        std::cerr << "RtAudio Error: " << e.getMessage() << std::endl;
-        throw;
-    }
-    #endif
 }
 
 void AudioStreamer::stopCapture() {
@@ -58,17 +52,10 @@ void AudioStreamer::stopCapture() {
             m_audio.closeStream();
         }
     }
-    #ifdef _WIN32
     catch (RtAudioErrorType& e) {
         std::cerr << "RtAudio Error: " << e << std::endl;
         throw;
     }
-    #else
-    catch (RtAudioError& e) {
-        std::cerr << "RtAudio Error: " << e.getMessage() << std::endl;
-        throw;
-    }
-    #endif
 }
 
 int AudioStreamer::recordCallback(void* out_buff, void* in_buff, unsigned int num_bframes,
@@ -131,9 +118,10 @@ void AudioReceiver::startAudioStream() {
         return;  // or handle error
     }
 
+	unsigned int bufferFrames = BUFFER_FRAMES;
     m_isReceiving = true;
     m_audio.openStream(
-        &outputParams, nullptr, RTAUDIO_FLOAT32, SAMPLE_RATE, (unsigned int *)&BUFFER_FRAMES,
+        &outputParams, nullptr, RTAUDIO_FLOAT32, SAMPLE_RATE, &bufferFrames,
         &playbackCallback, this
     );
 
