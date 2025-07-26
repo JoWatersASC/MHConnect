@@ -82,20 +82,42 @@ endif()
 # Fetch OpenCV Content
 #-------------------------
 set(OPENCV_REQUIRED_COMPONENTS imgproc videoio)
-FetchContent_Declare(
-    OpenCV
-    GIT_REPOSITORY https://github.com/opencv/opencv.git
-    GIT_TAG        4.9.0
 
-    FIND_PACKAGE_ARGS
-        CONFIG QUIET COMPONENTS ${OPENCV_REQUIRED_COMPONENTS}
-)
+find_package(OpenCV CONFIG QUIET COMPONENTS ${OPENCV_REQUIRED_COMPONENTS})
+
+if(NOT OpenCV_FOUND)
+	FetchContent_Declare(
+    	OpenCV
+    	GIT_REPOSITORY https://github.com/opencv/opencv.git
+    	GIT_TAG        4.9.0
+	)
+	FetchContent_MakeAvailable(OpenCV)
+	
+	set(OPENCV_LIB_TARGETS
+		opencv_imgproc
+		opencv_videoio
+	)
+
+else()
+	set(OPENCV_LIB_TARGETS ${OpenCV_LIBS})
+endif()
+
 set(BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(BUILD_PERF_TESTS OFF CACHE BOOL "" FORCE)
 set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(BUILD_opencv_apps OFF CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(OpenCV)
 
+#[[
+if(NOT TARGET OpenCV::videoio)
+	add_library(OpenCV::all_components INTERFACE IMPORTED)
+	target_include_directories(OpenCV::all_components INTERFACE ${OpenCV_INCLUDE_DIRS})
+	target_link_libraries(OpenCV::all_components INTERFACE ${OpenCV_LIBRARIES})
+
+	set(OPENCV_LINK_TARGET OpenCV::all_components)
+else()
+	set(OPENCV_LINK_TARGET OpenCV::imgproc OpenCV::videoio)
+endif()
+]]
 set(OPENCV_TARGETS "")
 foreach(comp ${OPENCV_REQUIRED_COMPONENTS})
     list(APPEND OPENCV_TARGETS opencv_${comp})
@@ -158,7 +180,8 @@ add_executable(${EX_NAME} main.cpp
 	"${INCLUDE_DIR}/gui.h" "${INCLUDE_DIR}/video.h")
 
 target_link_libraries(${LIB_NAME} PUBLIC rtaudio)
-target_link_libraries(${EX_NAME} PRIVATE ${OPENCV_TARGETS} wx::wxWidgets)
+target_link_libraries(${EX_NAME} PRIVATE ${OPENCV_LIB_TARGETS} wx::wxWidgets)
+target_include_directories(${EX_NAME} PRIVATE ${OpenCV_INCLUDE_DIRS})
 
 get_target_property(WXWIDGETS_INCLUDES wx::wxWidgets INTERFACE_INCLUDE_DIRECTORIES)
 message(STATUS "DEBUG: wxWidgets include directories are: ${WXWIDGETS_INCLUDES}")
