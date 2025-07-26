@@ -2,6 +2,7 @@
 A video conferencing application built with C++ that enables real-time audio, video, and text communication between users. The application utilizes native C++ libraries and established frameworks for handling multimedia and networking components.
 
 ![Demo](MHConnectDemo.gif)
+> *Top-left: Server(Windows), Bottom-left: Headless Client(WSL/Linux), Right: GUI Client(Windows)*
 
 ## Table of Contents
 - [Setup](#setup)
