@@ -17,7 +17,6 @@ inline std::pair<int, int> getScaleOfFrame(const int, const int, const cv::Mat&)
 
 class VidPanel : public wxPanel {
 public:
-	// std::
     VidPanel(wxPanel* parent, int _cam_id) 
         : wxPanel(parent) {
         
