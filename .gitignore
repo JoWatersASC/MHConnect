@@ -2,6 +2,8 @@
 .vs/
 .vscode/
 out/
+gui/
+CMakeFiles/
 
 # not this
 !.gitignore

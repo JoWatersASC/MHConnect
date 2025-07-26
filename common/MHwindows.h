@@ -25,11 +25,11 @@
 static WSADATA wsaData;
 static int result = WSAStartup(MAKEWORD(2, 2), &wsaData);
 
-inline const int winsock_initialize() {
-    if (result != 0) {
-        std::cerr << "WSAStartup failed with error: " << result << std::endl;
-        return 1;  // Exit the program or handle the error appropriately
-    }
-    std::cout << "Winsock initialized successfully!" << std::endl;
-    return 0;
-}
+//inline const int winsock_initialize() {
+//    if (result != 0) {
+//        std::cerr << "WSAStartup failed with error: " << result << std::endl;
+//        return 1;  // Exit the program or handle the error appropriately
+//    }
+//    std::cout << "Winsock initialized successfully!" << std::endl;
+//    return 0;
+//}

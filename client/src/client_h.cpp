@@ -1,4 +1,5 @@
-#include "../include/client.h"
+#include "../include/client_h.h"
+
 using namespace osf;
 
 bool Client::start_connect() {
@@ -8,8 +9,6 @@ bool Client::start_connect() {
         std::cout << "Connected to " << inet_ntoa(m_addr.sin_addr);
         std::cout << " on port " << ntohs(m_addr.sin_port) << std::endl;
         connected = true;
-
-        m_outaudio.startAudioStream(); 
     } else {
         std::cout << "Connection failed: [ERROR] ";
         std::cout << strerror(errno) << std::endl;
@@ -36,7 +35,6 @@ void Client::start_recv() {
 
     if(bytes > 0 && connected) {
         if(out_pckt.type == PCKTYPE::AUDIO) {
-            m_outaudio.receiveAudioData(out_pckt);
         } else if (out_pckt.type == PCKTYPE::TEXT){
             std::cout << "Received: " << out_pckt << std::endl;
 			msg_queue.enqueue(out_pckt);
@@ -99,8 +97,6 @@ void Client::close() {
 #else
         ::close(m_sock_fd);
 #endif
-        m_inaudio.stopCapture();
-        m_outaudio.stop();
     } else {
         std::cout << "Client already disconnected" << std::endl;
     }

@@ -1,6 +1,8 @@
 #pragma once
 
-#include<iostream>
+#ifndef MHCONNECTCOMMON
+#define MHCONNECTCOMMON
+
 
 #ifdef _WIN32
 
@@ -15,6 +17,7 @@
 #define socket_t int
 #endif
 
+#include<iostream>
 #include<utility>
 #include<string>
 #include<vector>
@@ -28,6 +31,27 @@
 #include<cctype>
 #include<cstdint>
 
+#ifdef _WIN32
+
+#include "MHwindows.h"
+
+inline const int winsock_initialize(){
+    if (result != 0) {
+        std::cerr << "WSAStartup failed with error: " << result << std::endl;
+        return 1;  // Exit the program or handle the error appropriately
+    }
+    std::cout << "Winsock initialized successfully!" << std::endl;
+    return 0;
+}
+
+#elif defined(__linux__)
+#include<netinet/in.h>
+#include<unistd.h>
+#include<signal.h>
+#include<arpa/inet.h>
+
+#define socket_t int
+#endif
 
 #define DEBUG 0
 
@@ -132,3 +156,5 @@ inline bool operator==(const sockaddr_in& a, const sockaddr_in& b) {
 namespace osf {
     inline uint16_t PORT = 16000;
 }
+
+#endif
