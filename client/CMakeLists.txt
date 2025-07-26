@@ -107,17 +107,6 @@ set(BUILD_PERF_TESTS OFF CACHE BOOL "" FORCE)
 set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(BUILD_opencv_apps OFF CACHE BOOL "" FORCE)
 
-#[[
-if(NOT TARGET OpenCV::videoio)
-	add_library(OpenCV::all_components INTERFACE IMPORTED)
-	target_include_directories(OpenCV::all_components INTERFACE ${OpenCV_INCLUDE_DIRS})
-	target_link_libraries(OpenCV::all_components INTERFACE ${OpenCV_LIBRARIES})
-
-	set(OPENCV_LINK_TARGET OpenCV::all_components)
-else()
-	set(OPENCV_LINK_TARGET OpenCV::imgproc OpenCV::videoio)
-endif()
-]]
 set(OPENCV_TARGETS "")
 foreach(comp ${OPENCV_REQUIRED_COMPONENTS})
     list(APPEND OPENCV_TARGETS opencv_${comp})
