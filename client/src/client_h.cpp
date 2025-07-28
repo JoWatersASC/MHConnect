@@ -1,75 +1,80 @@
 #include "../include/client_h.h"
+#include <iostream>
+#include <ostream>
 
 using namespace osf;
 
+static auto YOU_STR = "[YOU] ";
+
 bool Client::start_connect() {
-    int res = ::connect(m_sock_fd, (sockaddr *)&m_addr, sizeof(m_addr));
+	int res = ::connect(m_sock_fd, (sockaddr *)&m_addr, sizeof(m_addr));
 
-    if(res == 0) {
-        std::cout << "Connected to " << inet_ntoa(m_addr.sin_addr);
-        std::cout << " on port " << ntohs(m_addr.sin_port) << std::endl;
-        connected = true;
-    } else {
-        std::cout << "Connection failed: [ERROR] ";
-        std::cout << strerror(errno) << std::endl;
-        close();
-        return false;
-    }
+	if(res == 0) {
+		std::cout << "Connected to " << inet_ntoa(m_addr.sin_addr);
+		std::cout << " on port " << ntohs(m_addr.sin_port) << std::endl;
+		connected = true;
+	} else {
+		std::cout << "Connection failed: [ERROR] ";
+		std::cout << strerror(errno) << std::endl;
+		close();
+		return false;
+	}
 
-    return true;
+	return true;
 }
 
 void Client::start_recv() {
-    if(!connected) {
-        std::cout << "Reception impossible, socket not connected" << std::endl;
-        return;
-    }
+	if(!connected) {
+		std::cout << "Reception impossible, socket not connected" << std::endl;
+		return;
+	}
 
-    packet out_pckt;
-    ssize_t bytes;
+	packet out_pckt;
+	ssize_t bytes;
 
-    {
-        lockg recv_lock(recv_mtx);
-        bytes = recv_pckt(m_sock_fd, out_pckt);
-    }
+	{
+		lockg recv_lock(recv_mtx);
+		bytes = recv_pckt(m_sock_fd, out_pckt);
+	}
 
-    if(bytes > 0 && connected) {
-        if(out_pckt.type == PCKTYPE::AUDIO) {
-        } else if (out_pckt.type == PCKTYPE::TEXT){
-            std::cout << "Received: " << out_pckt << std::endl;
+	if(bytes > 0 && connected) {
+		if (out_pckt.type == PCKTYPE::TEXT) {
+			std::cout << "\33[2K\r" "Received: " << out_pckt << std::endl;
+			std::cout << YOU_STR;
+			std::flush(std::cout);
+
 			msg_queue.enqueue(out_pckt);
 
 			notify();
-        }
-        recv_tp.add([this]() { start_recv(); });
-    } else {
-        if(bytes == 0) {
-            std::cout << "Orderly shutdown from server" << std::endl;
-            connected = false;
-        }
-        else {
-            std::cout << "Reception failed: [ERROR] ";
-            std::cout << strerror(errno) << std::endl;
-        }
-    }
+		}
+		recv_tp.add([this]() { start_recv(); });
+	} else {
+		if(bytes == 0) {
+			std::cout << "Orderly shutdown from server" << std::endl;
+			connected = false;
+		}
+		else {
+			std::cout << "Reception failed: [ERROR] ";
+			std::cout << strerror(errno) << std::endl;
+		}
+	}
 }
 
 void Client::start_send() {
-    if(!connected) {
-        std::cout << "Data transmission impossible, socket not connected" << std::endl;
-        return;
-    }
+	if(!connected) {
+		std::cout << "Data transmission impossible, socket not connected" << std::endl;
+		return;
+	}
 
-    std::string msg;
-    std::cout << "[YOU] ";
+	std::string msg;
+	// std::cout << "[YOU] ";
 
-    while(std::getline(std::cin, msg) && connected) {
-        start_send(msg);
-        
-        std::cout << "[YOU] ";
-    }
+	while(std::getline(std::cin, msg) && connected) {
+		start_send(msg);
+		std::cout << YOU_STR;
+	}
 
-    close();
+	close();
 }
 void Client::start_send(const std::string& _msg) {
 	packet out_pckt{};
@@ -90,15 +95,15 @@ void Client::start_send(const std::string& _msg) {
 }
 
 void Client::close() {
-    if(connected) {
-        std::cout << "Shutting down client" << std::endl;
+	if(connected) {
+		std::cout << "Shutting down client" << std::endl;
 #ifdef _WIN32
-        closesocket(m_sock_fd);
+		closesocket(m_sock_fd);
 #else
-        ::close(m_sock_fd);
+		::close(m_sock_fd);
 #endif
-    } else {
-        std::cout << "Client already disconnected" << std::endl;
-    }
-    connected = false;
+	} else {
+		std::cout << "Client already disconnected" << std::endl;
+	}
+	connected = false;
 }
