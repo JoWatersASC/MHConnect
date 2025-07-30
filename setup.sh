@@ -20,13 +20,16 @@ echo "Linux distro: $OS_ID"
 if [ "$OS_ID" = "ubuntu" ] || [ "$OS_ID" = "debian" ]; then
     echo "Installing dependencies for Debian/Ubuntu..."
     $SUDO apt-get update
-    $SUDO apt-get install -y build-essential cmake libasound2-dev libopencv-dev
-	$SUDO apt-get install -y libgtk-3-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libnotify-dev libsecret-1-dev libgl1-mesa-dev
+    $SUDO apt-get install -y build-essential cmake \
+		libasound2-dev \
+		libopencv-dev \
+		libgtk-3-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libnotify-dev libsecret-1-dev libgl1-mesa-dev # GUI libraries
 
 elif [ "$OS_ID" = "fedora" ]; then
     echo "Installing dependencies for Fedora..."
-    $SUDO dnf install -y @"Development Tools" cmake alsa-lib-devel gtk3-devel opencv-devel
-	$SUDO dnf install gstreamer1-devel gstreamer1-plugins-base-devel libnotify-devel libsecret-devel mesa-libGL-devel
+	$SUDO dnf install -y alsa-lib-devel \
+		opencv-devel \
+		gtk3-devel gstreamer1-devel gstreamer1-plugins-base-devel libnotify-devel libsecret-devel mesa-libGL-devel # GUI libraries
 
 else
     echo "Unsupported Linux distribution: $OS_ID"
