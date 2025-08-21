@@ -1,10 +1,9 @@
-#include "client.h"
 #include "gui.h"
 
 using namespace osf;
 
 #ifdef _WIN32
-#define main 
+#define main
 #endif
 
 wxIMPLEMENT_APP(Application);
