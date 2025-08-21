@@ -21,13 +21,15 @@ if [ "$OS_ID" = "ubuntu" ] || [ "$OS_ID" = "debian" ]; then
     echo "Installing dependencies for Debian/Ubuntu..."
     $SUDO apt-get update
     $SUDO apt-get install -y build-essential cmake \
-		libasound2-dev \
+		libasound2-dev pulseaudio \
 		libopencv-dev \
 		libgtk-3-dev libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev libnotify-dev libsecret-1-dev libgl1-mesa-dev # GUI libraries
 
 elif [ "$OS_ID" = "fedora" ]; then
     echo "Installing dependencies for Fedora..."
-	$SUDO dnf install -y alsa-lib-devel \
+	$SUDO dnf install -y --skip-broken \
+		alsa-lib-devel alsa-utils \
+		pulseaudio alsa-plugins-pulseaudio pulseaudio-libs-devel pulseaudio-utils \
 		opencv-devel \
 		gtk3-devel gstreamer1-devel gstreamer1-plugins-base-devel libnotify-devel libsecret-devel mesa-libGL-devel # GUI libraries
 
