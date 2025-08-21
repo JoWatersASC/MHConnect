@@ -1,12 +1,10 @@
 #pragma once
 
 #include "common.h"
+#include "context.h"
 #include "threadpool.h"
-#include "core.h"
 
-#include<memory>
-#include<algorithm>
-#include<atomic>
+#include <atomic>
 
 namespace osf
 {
@@ -14,14 +12,9 @@ namespace osf
 class Client {
 public:
 	Client();
-	Client(int _fd, sockaddr_in& _addr, size_t _nthreads)
-	: m_sock_fd(_fd), m_addr(_addr),
-	recv_tp(_nthreads / 3), send_tp(_nthreads * 2 / 3) {
-		send_tp.start();
-		recv_tp.start();
-	}
+	Client(int _fd, sockaddr_in& _addr, client_context &_ctx);
 
-	bool start_connect();
+	bool try_connect();
 	void start_recv();
 	void start_send();
 	void start_send(const std::string& msg);
@@ -32,21 +25,17 @@ public:
 	void close();
 
 private:
-	int m_sock_fd;
+	socket_t m_sock_fd;
 	sockaddr_in m_addr;
-
-	ThreadPool recv_tp;
-	ThreadPool send_tp;
-
-	packet m_pckt;
-
+	client_context &ctx;
 	std::atomic<bool> connected;
-	
 	tqueue<packet> msg_queue;
 
+	std::mutex send_mtx;
+	std::mutex recv_mtx;
+
 public:
-	class listener {
-	public:
+	struct listener {
 		virtual ~listener() {}
 		virtual void onNotify(const packet&) = 0;
 	};
@@ -54,15 +43,17 @@ public:
 	void addListener(listener* _listener) { listeners.push_back(_listener); }
 
 private:
-	std::vector<listener*> listeners;
+	std::vector<listener *> listeners;
 
 	void notify() {
 		if (!pollable())
 			return;
 
+		std::lock_guard<std::mutex> lock(recv_mtx);
 		const packet p = msg_queue.pop_front();
+
 		for (auto& listener : listeners) {
-			listener->onNotify(p);
+			ctx.add_recv_task( [&] { listener->onNotify(p); } );
 		}
 	}
 };
