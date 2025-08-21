@@ -1,5 +1,6 @@
 #pragma once
 
+#include <queue>
 #ifdef _WIN32
 #define _WINSOCKAPI_
 #endif
@@ -10,16 +11,16 @@
 #undef _WINSOCKAPI_
 #endif
 
+#include "client.h"
+#include "context.h"
 #include "common.h"
 #include "threadpool.h"
-
-#include "core.h"
 
 namespace osf
 {
 
 static const int SAMPLE_RATE = 44100;
-static const unsigned int BUFFER_FRAMES = 256;
+static const unsigned int BUFFER_FRAMES = 64;
 static const int INCHANNELS = 1;
 static const int OUTCHANNELS = 2;
 static const int BYTES_PER_SAMPLE = sizeof(float);
@@ -46,7 +47,7 @@ private:
     int m_sock_fd;
     std::vector<char> m_audioBuff;
     std::atomic<bool> isCapturing = false;
-    
+
     ThreadPool& send_tp;
 
     static int recordCallback(void*, void*, unsigned int, double, RtAudioStreamStatus, void*);
@@ -54,7 +55,7 @@ private:
 
 class AudioReceiver {
 public:
-    AudioReceiver(int _fd, ThreadPool& r_tp) 
+    AudioReceiver(int _fd, ThreadPool& r_tp)
     : m_sock_fd(_fd), recv_tp(r_tp) {
         if (m_audio.getDeviceCount() < 1) {
             throw std::runtime_error("No audio devices found!");
@@ -78,11 +79,33 @@ private:
 
     ThreadPool& recv_tp;
 
-    static constexpr int SAMPLE_RATE = 44100;
-    static constexpr int BUFFER_FRAMES = 256;
-    static constexpr int CHANNELS = 2;
-
     static int playbackCallback(void*, void*, unsigned int, double, RtAudioStreamStatus, void*);
+};
+
+typedef int RtAudioStreamStatus;
+class AudioDuplex : public osf::Client::listener {
+public:
+	void start(client_context &cl_ctx);
+	void stop() {
+		m_out_audio.stopStream();
+		m_in_audio.stopStream();
+	}
+
+	void onNotify(const packet &p) final {
+		if(p.type != PCKTYPE::AUDIO)
+			return;
+
+		recv_queue.enqueue(p);
+	}
+    static int callback(void*, void*, unsigned int, double, unsigned int, void*);
+
+private:
+	RtAudio m_out_audio;
+	RtAudio m_in_audio;
+
+	struct { client_context *ctx; AudioDuplex *audio; } audio_pair;
+	tqueue<packet> recv_queue;
+	std::mutex m_mtx;
 };
 
 }

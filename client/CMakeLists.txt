@@ -21,10 +21,11 @@ message(STATUS "HEADLESS BUILD BUILT")
 
 set(SOURCE_FILES
     src/client_h.cpp
+	src/context.cpp
 )
 set(HEADER_FILES
     "${INCLUDE_DIR}/client_h.h"
-    "${INCLUDE_DIR}/core.h"
+	"${INCLUDE_DIR}/context.h"
 )
 
 if(BUILD_SHARED_LIBS)
@@ -41,17 +42,20 @@ message(STATUS "GUI BUILD BUILT")
 set(SOURCE_FILES
     src/client.cpp
     src/audio.cpp
+	src/context.cpp
 )
 set(HEADER_FILES
     "${INCLUDE_DIR}/client.h"
     "${INCLUDE_DIR}/audio.h"
-    "${INCLUDE_DIR}/core.h"
+	"${INCLUDE_DIR}/context.h"
 )
 
 include(FetchContent)
-#-------------------------
-# Fetch RtAudio Content
-#-------------------------
+#[[
+-------------------------
+ Fetch RtAudio Content
+-------------------------
+]]
 find_package(RtAudio)
 if(RtAudio_FOUND)
 	message(STATUS "RtAudio found in system")
@@ -78,9 +82,11 @@ else()
     message(FATAL_ERROR "RtAudio target 'rtaudio' not found after find/fetch. Check RtAudio's CMake configuration.")
 endif()
 
-#-------------------------
-# Fetch OpenCV Content
-#-------------------------
+#[[
+-------------------------
+Fetch OpenCV Content
+-------------------------
+]]
 set(OPENCV_REQUIRED_COMPONENTS imgproc videoio)
 
 find_package(OpenCV CONFIG QUIET COMPONENTS ${OPENCV_REQUIRED_COMPONENTS})
@@ -187,3 +193,17 @@ target_include_directories(${LIB_NAME} PUBLIC
 
 target_link_libraries(${LIB_NAME} INTERFACE commonlib)
 target_link_libraries(${EX_NAME} PRIVATE ${LIB_NAME})
+
+option(ASAN_NOT_TSAN "Enables address sanitizer INSTEAD of thread sanitizer" OFF)
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+	target_compile_options(${EX_NAME} PRIVATE -g -O0 -fno-omit-frame-pointer)
+
+	if(ASAN_NOT_TSAN)
+		target_compile_options(${EX_NAME} PRIVATE -fsanitize=address)
+		target_link_options(${EX_NAME} PRIVATE -fsanitize=address)
+	else()
+		target_compile_options(${EX_NAME} PRIVATE -fsanitize=thread)
+		target_link_options(${EX_NAME} PRIVATE -fsanitize=thread)
+	endif()
+endif()
+

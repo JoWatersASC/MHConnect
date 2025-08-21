@@ -1,7 +1,8 @@
+#include "audio.h"
 #include "gui.h"
 #include "video.h"
 
-StartMenuFrame::StartMenuFrame( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxFrame( parent, id, title, pos, size, style )
+StartMenuFrame::StartMenuFrame( client_context &_cl_ctx, wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : cl_ctx(_cl_ctx), wxFrame( parent, id, title, pos, size, style )
 {
 	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
 
@@ -62,22 +63,29 @@ void StartMenuFrame::connectServer( wxCommandEvent& event ) {
 	sockaddr_in serv_addr = osf::create_address(std::move(_ip), std::move(_portno));
 	int cl_fd = socket(AF_INET, SOCK_STREAM, 0);
 	
-	osf::Client* new_client = new osf::Client(cl_fd, serv_addr, 6);
+	osf::Client* new_client = new osf::Client(cl_fd, serv_addr, cl_ctx);
 	
-	if(!new_client->start_connect()) {
+	if(!new_client->try_connect()) {
 		clearFields(event);
 		delete new_client;
 		return;
 	}
-	
-	new_client->start_recv();
-	
-	Interface* _gui = new Interface(nullptr, *new_client, wxID_ANY, "MHConnect");
+
+	Interface *_gui = new Interface(nullptr, *new_client, wxID_ANY, "MHConnect");
+	osf::AudioDuplex *_audiod = new osf::AudioDuplex();
 	
 	this->Enable(false);
 	this->Hide();
 	
 	_gui->Show(true);
+
+	cl_ctx.client = new_client;
+	cl_ctx.interface = _gui;
+	cl_ctx.audiod = _audiod;
+	_audiod->start(cl_ctx);
+	cl_ctx.run();
+
+	this->Close();
 }
 Interface* StartMenuFrame::getUserScreen() {
 	return nullptr;

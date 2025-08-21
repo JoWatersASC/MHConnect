@@ -1,9 +1,15 @@
-#include "../include/client.h"
-using namespace osf;
+#include "client.h"
+#include "context.h"
+
+namespace osf
+{
 
 static auto YOU_STR = "[YOU] ";
 
-bool Client::start_connect() {
+Client::Client(int _fd, sockaddr_in& _addr, client_context &_ctx)
+	: m_sock_fd(_fd), m_addr(_addr), ctx(_ctx) {}
+
+bool Client::try_connect() {
 	int res = ::connect(m_sock_fd, (sockaddr *)&m_addr, sizeof(m_addr));
 
 	if(res == 0) {
@@ -11,7 +17,6 @@ bool Client::start_connect() {
 		std::cout << " on port " << ntohs(m_addr.sin_port) << std::endl;
 		connected = true;
 
-		m_outaudio.startAudioStream();
 	} else {
 		std::cout << "Connection failed: [ERROR] ";
 		std::cout << strerror(errno) << std::endl;
@@ -32,19 +37,14 @@ void Client::start_recv() {
 	ssize_t bytes;
 
 	{
-		lockg recv_lock(recv_mtx);
+		std::lock_guard<std::mutex> lock(ctx.recv_mtx);
 		bytes = recv_pckt(m_sock_fd, out_pckt);
 	}
 
 	if(bytes > 0 && connected) {
-		if (out_pckt.type == PCKTYPE::AUDIO) {
-		} else if (out_pckt.type == PCKTYPE::TEXT) {
-			// std::cout << "\33[2K\r" "Received: " << out_pckt << std::endl;
-			msg_queue.enqueue(out_pckt);
-
-			notify();
-		}
-		recv_tp.add([this]() { start_recv(); });
+		msg_queue.enqueue(out_pckt);
+		notify();
+		ctx.add_recv_task([this] { start_recv(); });
 	} else {
 		if(bytes == 0) {
 			std::cout << "Orderly shutdown from server" << std::endl;
@@ -92,6 +92,18 @@ void Client::start_send(const std::string& _msg) {
 	}
 }
 
+void Client::notify() {
+	if (!pollable())
+		return;
+
+	std::lock_guard<std::mutex> lock(recv_mtx);
+	const packet p = msg_queue.pop_front();
+
+	for (auto& listener : listeners) {
+		ctx.add_recv_task( [&] { listener->onNotify(p); } );
+	}
+}
+
 void Client::close() {
 	if(connected) {
 		std::cout << "Shutting down client" << std::endl;
@@ -100,10 +112,10 @@ void Client::close() {
 #else
 		::close(m_sock_fd);
 #endif
-		m_inaudio.stopCapture();
-		m_outaudio.stop();
 	} else {
 		std::cout << "Client already disconnected" << std::endl;
 	}
 	connected = false;
 }
+
+} // namespace osf
