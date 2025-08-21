@@ -1,6 +1,8 @@
 #pragma once
 
 #include "client.h"
+#include "common.h"
+#include "context.h"
 
 #include <wx/wx.h>
 
@@ -59,12 +61,12 @@ public:
 class Interface : public MainFrame, public osf::Client::listener {
 public:
 	Interface(wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = "MHConnect",
-		const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 800,600 ), 
+		const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 800,600 ),
 		long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL|wxMODERN );
 		
 	//To be constructed with a client
 	Interface(wxWindow* parent, osf::Client&, wxWindowID id = wxID_ANY, const wxString& title = "MHConnect",
-		const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 800,600 ), 
+		const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 800,600 ),
 		long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL|wxMODERN);
 
 	void linkClient(osf::Client& _client) {
@@ -73,10 +75,15 @@ public:
 	}
 
 	void onNotify(const packet& _data) {
+		if(_data.type != PCKTYPE::TEXT)
+			return;
+
 		std::string msg = "[MSG] " + std::string(_data.data);
-		add_text(msg);
+		wxTheApp->CallAfter([this, msg] {
+			add_text(wxString::FromUTF8(msg));
+		});
 	}
-	void add_text(std::string&);
+	void add_text(wxString&&);
 	
 private:
 	osf::Client* m_client;
@@ -84,6 +91,7 @@ private:
 	
 };
 
+using osf::client_context;
 class StartMenuFrame : public wxFrame
 {
 	private:
@@ -102,8 +110,10 @@ class StartMenuFrame : public wxFrame
 
 
 	public:
+		client_context &cl_ctx;
 
-		StartMenuFrame( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 500,300 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
+		StartMenuFrame( client_context &_cl_ctx, wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString,
+			const wxPoint& pos = wxDefaultPosition,const wxSize& size = wxSize( 500,300 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
 
 		~StartMenuFrame();
 

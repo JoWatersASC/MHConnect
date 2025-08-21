@@ -1,3 +1,4 @@
+#include "context.h"
 #include "gui.h"
 #include "video.h"
 
@@ -111,20 +112,19 @@ void Interface::submit_msg(wxCommandEvent& event) {
 	}
 }
 
-void Interface::add_text(std::string& _msg) {
-	this->m_chatbox->AppendText(_msg);
-	this->m_chatbox->AppendText('\n');
-	this->m_chatbox->ShowPosition(m_chatbox->GetLastPosition());
+void Interface::add_text(wxString &&_msg) {
+	m_chatbox->AppendText(std::move(_msg));
+	m_chatbox->AppendText('\n');
+	m_chatbox->ShowPosition(m_chatbox->GetLastPosition());
 }
-
 
 bool Application::OnInit() {
 #ifdef _WIN32
 	if (winsock_initialize())
 		return 1;
 #endif
-	
-	StartMenuFrame* start_menu = new StartMenuFrame(nullptr, wxID_ANY, "MHConnect");
+	osf::client_context *ctx = new client_context;
+	StartMenuFrame* start_menu = new StartMenuFrame(*ctx, nullptr, wxID_ANY, "MHConnect");
 	start_menu->Show(true);
 	SetTopWindow(start_menu);
 
