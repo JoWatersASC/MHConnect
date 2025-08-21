@@ -194,15 +194,16 @@ target_include_directories(${LIB_NAME} PUBLIC
 target_link_libraries(${LIB_NAME} INTERFACE commonlib)
 target_link_libraries(${EX_NAME} PRIVATE ${LIB_NAME})
 
+option(ASAN_NOT_TSAN "Enables address sanitizer INSTEAD of thread sanitizer" OFF)
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-	target_compile_options(${EX_NAME} PRIVATE
-        -g -O0 -fno-omit-frame-pointer
-		#-fsanitize=address
-		-fsanitize=thread  # Add these for debugging
-    )
-	target_link_options(${EX_NAME} PRIVATE
-		#-fsanitize=address
-		-fsanitize=thread
-    )
+	target_compile_options(${EX_NAME} PRIVATE -g -O0 -fno-omit-frame-pointer)
+
+	if(ASAN_NOT_TSAN)
+		target_compile_options(${EX_NAME} PRIVATE -fsanitize=address)
+		target_link_options(${EX_NAME} PRIVATE -fsanitize=address)
+	else()
+		target_compile_options(${EX_NAME} PRIVATE -fsanitize=thread)
+		target_link_options(${EX_NAME} PRIVATE -fsanitize=thread)
+	endif()
 endif()
 
