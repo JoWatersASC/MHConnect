@@ -266,7 +266,7 @@ void AudioDuplex::start(client_context &cl_ctx) {
 		std::cout << "Started audio" << std::endl;
 	} catch(RtAudioErrorType &e) {
 	}
-	std::atexit(write_to_file);
+	//std::atexit(write_to_file);
 }
 
 std::mutex record_mtx;
@@ -294,10 +294,10 @@ int AudioDuplex::callback(void *out_buff, void *in_buff, unsigned int num_bframe
 		memcpy(&p.data, in_buff, payload);
 		p.type = PCKTYPE::AUDIO;
 
-		{
+		/*{
 			std::lock_guard<std::mutex> lock(record_mtx);
 			record_vect.insert(record_vect.end(), (float*)in_buff, (float *)in_buff + samples);
-		}
+		}*/
 		// std::cout << "Wrote to recording vector" << std::endl;
 
 		const auto &sock = audio_ctx->ctx->client->get_sock();

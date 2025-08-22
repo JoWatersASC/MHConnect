@@ -38,6 +38,8 @@ public:
 			timer_->Stop();
 			delete timer_;
 		}*/
+		running_ = false;
+		cap_thread.join();
 		m_cap.release();
 	}
 
