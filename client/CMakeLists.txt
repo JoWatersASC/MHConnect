@@ -2,7 +2,6 @@ set(LIB_NAME "MHConnectClientCore")
 set(H_EX_NAME "MHConnectClient_Headless")
 set(EX_NAME "MHConnectClient")
 
-
 option(BUILD_SHARED_LIBS OFF)
 option(HEADLESS_BUILD ON)
 if(WIN32)
@@ -13,8 +12,6 @@ set(INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 set(SOURCE_FILES)
 set(HEADER_FILES)
-
-
 
 if(HEADLESS_BUILD)
 message(STATUS "HEADLESS BUILD BUILT")
@@ -41,12 +38,10 @@ message(STATUS "GUI BUILD BUILT")
 
 set(SOURCE_FILES
     src/client.cpp
-    src/audio.cpp
 	src/context.cpp
 )
 set(HEADER_FILES
     "${INCLUDE_DIR}/client.h"
-    "${INCLUDE_DIR}/audio.h"
 	"${INCLUDE_DIR}/context.h"
 )
 
@@ -67,7 +62,7 @@ if(RtAudio_FOUND)
         message(STATUS "Created wrapper target for legacy RtAudio variables.")
     endif()
 else()
-	message(STATUS "RtAudio NOT found in system, fetching content")
+	message(NOTICE "RtAudio NOT found in system, fetching content")
 	FetchContent_Declare(
 		RTAudio
 		GIT_REPOSITORY https://github.com/thestk/rtaudio.git
@@ -78,6 +73,7 @@ endif()# RtAudio_FOUND
 
 if (TARGET rtaudio)
     message(STATUS "RtAudio found/fetched and target 'rtaudio' is available.")
+	message("")
 else()
     message(FATAL_ERROR "RtAudio target 'rtaudio' not found after find/fetch. Check RtAudio's CMake configuration.")
 endif()
@@ -92,6 +88,8 @@ set(OPENCV_REQUIRED_COMPONENTS imgproc videoio)
 find_package(OpenCV CONFIG QUIET COMPONENTS ${OPENCV_REQUIRED_COMPONENTS})
 
 if(NOT OpenCV_FOUND)
+	message(NOTICE "OpenCV NOT found in system, fetching content")
+
 	FetchContent_Declare(
     	OpenCV
     	GIT_REPOSITORY https://github.com/opencv/opencv.git
@@ -120,6 +118,7 @@ endforeach()
 
 if(OpenCV_FOUND)
     message(STATUS "Found OpenCV: ${OpenCV_VERSION}")
+	message("")
 endif()
 
 #-------------------------
@@ -142,7 +141,7 @@ if(wxWidgets_FOUND)
         message(STATUS "Created wrapper target for system wxWidgets.")
     endif()
 else()
-    message(STATUS "System installed wxWidgets NOT found, fetching content")
+    message(NOTICE "System installed wxWidgets NOT found, fetching content")
     
     FetchContent_Declare(
         wxwidgets_proj
@@ -171,11 +170,10 @@ else()
 endif() # BUILD_SHARED_LIBS
 
 add_executable(${EX_NAME} main.cpp
-    src/main_gui.cpp src/start_gui.cpp src/video.cpp
-	"${INCLUDE_DIR}/gui.h" "${INCLUDE_DIR}/video.h")
+    src/main_gui.cpp src/start_gui.cpp src/video.cpp src/audio.cpp
+	"${INCLUDE_DIR}/gui.h" "${INCLUDE_DIR}/video.h" "${INCLUDE_DIR}/audio.h")
 
-target_link_libraries(${LIB_NAME} PUBLIC rtaudio)
-target_link_libraries(${EX_NAME} PRIVATE ${OPENCV_LIB_TARGETS} wx::wxWidgets)
+target_link_libraries(${EX_NAME} PRIVATE ${OPENCV_LIB_TARGETS} wx::wxWidgets rtaudio)
 target_include_directories(${EX_NAME} PRIVATE ${OpenCV_INCLUDE_DIRS})
 
 get_target_property(WXWIDGETS_INCLUDES wx::wxWidgets INTERFACE_INCLUDE_DIRECTORIES)
@@ -194,16 +192,26 @@ target_include_directories(${LIB_NAME} PUBLIC
 target_link_libraries(${LIB_NAME} INTERFACE commonlib)
 target_link_libraries(${EX_NAME} PRIVATE ${LIB_NAME})
 
+option(NO_SANITIZER "Disables both ASAN and TSAN, gives cleaner error output" ON)
 option(ASAN_NOT_TSAN "Enables address sanitizer INSTEAD of thread sanitizer" OFF)
+
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 	target_compile_options(${EX_NAME} PRIVATE -g -O0 -fno-omit-frame-pointer)
 
+    if(NO_SANITIZER)
+        message(DEBUG "NO SANITIZER PRESENT")
+        return()
+    endif()
+
 	if(ASAN_NOT_TSAN)
+        message(DEBUG "USING ADDRESS SANITIZER")
+
 		target_compile_options(${EX_NAME} PRIVATE -fsanitize=address)
 		target_link_options(${EX_NAME} PRIVATE -fsanitize=address)
 	else()
+        message(DEBUG "USING THREAD SANITIZER")
+
 		target_compile_options(${EX_NAME} PRIVATE -fsanitize=thread)
 		target_link_options(${EX_NAME} PRIVATE -fsanitize=thread)
 	endif()
 endif()
-
