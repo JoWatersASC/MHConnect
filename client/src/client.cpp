@@ -99,7 +99,7 @@ void Client::notify() {
 	std::lock_guard<std::mutex> lock(recv_mtx);
 	const packet p = msg_queue.pop_front();
 
-	for (auto& listener : listeners) {
+	for(auto &listener : listeners) {
 		ctx.add_recv_task( [&] { listener->onNotify(p); } );
 	}
 }
