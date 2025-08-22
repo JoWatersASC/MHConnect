@@ -63,9 +63,9 @@ struct client_context {
 	std::mutex recv_mtx; // won't need if using multiple ports for text, audio, video, etc.
 	// sockaddr_in audio_sockaddr; - for udp implementation
 
-	Client *client       = nullptr;
-	AudioDuplex *audiod  = nullptr;
-	Interface *interface = nullptr;
+	Client *client        = nullptr;
+	AudioDuplex *audiod   = nullptr;
+	Interface *interface_ = nullptr;
 };
 
 }

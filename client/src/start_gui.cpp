@@ -80,7 +80,7 @@ void StartMenuFrame::connectServer( wxCommandEvent& event ) {
 	_gui->Show(true);
 
 	cl_ctx.client = new_client;
-	cl_ctx.interface = _gui;
+	cl_ctx.interface_ = _gui;
 	cl_ctx.audiod = _audiod;
 	_audiod->start(cl_ctx);
 	cl_ctx.run();
