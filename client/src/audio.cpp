@@ -43,6 +43,8 @@ void AudioDuplex::start(client_context &cl_ctx) {
 		m_audio.startStream();
 		std::cout << "Started audio" << std::endl;
 	} catch(RtAudioErrorType &e) { }
+
+	audio_pair.ctx->client->addListener(this);
 }
 
 static std::vector<float> record_vect;
