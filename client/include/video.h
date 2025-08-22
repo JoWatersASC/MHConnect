@@ -39,7 +39,8 @@ public:
 			delete timer_;
 		}*/
 		running_ = false;
-		cap_thread.join();
+		if(cap_thread.joinable())
+			cap_thread.join();
 		m_cap.release();
 	}
 

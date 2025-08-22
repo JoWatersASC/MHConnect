@@ -46,14 +46,25 @@ private:
 
 public:
 	struct listener {
-		virtual ~listener() {}
+		virtual ~listener() {
+			client_->remListener(this);
+		}
 		virtual void onNotify(const packet&) = 0;
+
+		Client *client_ = nullptr;
 	};
 
-	void addListener(listener* _listener) { listeners.push_back(_listener); }
+	void addListener(listener *_listener) {
+		listeners.push_back(_listener);
+		_listener->client_ = this;
+	}
+	void remListener(listener *_listener) {
+		auto &vec = listeners;
+		vec.erase(std::remove(vec.begin(), vec.end(), _listener), vec.end());
+	}
 
 private:
-	std::vector<listener *> listeners;
+	std::vector<listener*> listeners;
 
 	void notify();
 };
